@@ -48,9 +48,9 @@ for features, lables in test:
     yt.append(lables)
 temp = np.array(y)
 print(np.max(temp))
-X = np.array(X, dtype=np.float32) / 255
+X = np.array(X, dtype=np.float32)
 y = np.array(y, dtype=np.int64)
-Xt = np.array(Xt, dtype=np.float32) / 255
+Xt = np.array(Xt, dtype=np.float32)
 yt = np.array(yt, dtype=np.int64)
 print(np.max(X[0]), np.max(Xt[0]))
 
@@ -64,6 +64,7 @@ yt = torch.from_numpy(yt)
 Xt.to(torch.float32)
 yt.to(torch.int64)
 print(Xt.dtype, yt.dtype)
+print(X[10:], Xt[:10])
 print(y[10:], yt[:10])
 
 check = [0, 0]
