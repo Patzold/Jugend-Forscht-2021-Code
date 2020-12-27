@@ -72,16 +72,16 @@ if False:
     print(len(train), len(test))
 
     # train = np.array(train)
-    pickle_out = open((save_dir + "classes_rubt_1.pickle"),"wb")
+    pickle_out = open((save_dir + "categorys_rubt_1.pickle"),"wb")
     pickle.dump(train, pickle_out)
     pickle_out.close()
-    pickle_out = open((save_dir + "classes_rubt_1t.pickle"),"wb")
+    pickle_out = open((save_dir + "categorys_rubt_1t.pickle"),"wb")
     pickle.dump(test, pickle_out)
     pickle_out.close()
 else:
-    pickle_in = open(save_dir + "classes_rubt_1.pickle","rb")
+    pickle_in = open(save_dir + "categorys_rubt_1.pickle","rb")
     train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "classes_rubt_1t.pickle","rb")
+    pickle_in = open(save_dir + "categorys_rubt_1t.pickle","rb")
     test = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
@@ -259,7 +259,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/classes_rubt_1_1.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_rubt_1_1.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
