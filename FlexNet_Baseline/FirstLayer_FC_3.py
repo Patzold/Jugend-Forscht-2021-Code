@@ -178,8 +178,8 @@ for epoch in range(EPOCHS):
         net.zero_grad()
         optimizer.zero_grad()
         outputs = net(batch_X.view(-1, 6))
-        # print(batch_X, batch_y, outputs)
-        # input()
+        print(batch_X, batch_y, outputs)
+        input()
         loss = loss_function(outputs, batch_y)
         loss.backward()
         optimizer.step() # Does the update
