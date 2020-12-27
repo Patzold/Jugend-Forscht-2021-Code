@@ -149,9 +149,9 @@ class Net(nn.Module):
         self._to_linear = None
         self.convs(x)
 
-        self.fc1 = nn.Linear(self._to_linear, 200) #flattening.
-        self.fc2 = nn.Linear(200, 150)
-        self.fc3 = nn.Linear(150, 2)
+        self.fc1 = nn.Linear(self._to_linear, 300) #flattening.
+        self.fc2 = nn.Linear(300, 100)
+        self.fc3 = nn.Linear(100, 2)
 
     def convs(self, x):
             c1 = self.conv1(x)
@@ -290,5 +290,5 @@ plt.show()
 # Conv: 32, 64  FC: 200, 100
 # Max Out of Sample Accuracy: 0.897    9min 20s (Adam, 0.001)  (1_1)
 
-# Conv: 32, 64  FC: 200, 150
-# Max Out of Sample Accuracy: 0.897    9min 26s (Adam, 0.001)  (1_1)
+# Conv: 32, 64  FC: 300, 100
+# Max Out of Sample Accuracy: 0.904    10min 52s (Adam, 0.001)  (1_1)  <-- Selected
