@@ -1,5 +1,5 @@
 import os
-os.chdir("First Layer")
+os.chdir("FlexNet_Baseline")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -24,8 +24,8 @@ torch.cuda.manual_seed_all(seed)
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
 
-base_dir = "C:/Datasets/PJF-25/data/"
-save_dir = "C:/Datasets/PJF-25/safe/3 MC only/"
+base_dir = "C:/Datasets/PJF-30/data/"
+save_dir = "C:/Datasets/PJF-30/safe/"
 
 pickle_in = open(save_dir + "intm_3_raw.pickle","rb")
 train = pickle.load(pickle_in)
@@ -48,9 +48,9 @@ for features, lables in test:
     yt.append(lables)
 temp = np.array(y)
 print(np.max(temp))
-X = np.array(X, dtype=np.float32) / 255
+X = np.array(X, dtype=np.float32)
 y = np.array(y, dtype=np.int64)
-Xt = np.array(Xt, dtype=np.float32) / 255
+Xt = np.array(Xt, dtype=np.float32)
 yt = np.array(yt, dtype=np.int64)
 print(np.max(X[0]), np.max(Xt[0]))
 
@@ -73,11 +73,11 @@ print(Xt.dtype, yt.dtype)
 print(y[10:], yt[:10])
 print(X[10:], Xt[:10])
 
-check = [0, 0, 0]
+check = [0, 0]
 for i in range(l):
         check[y[i].numpy()] += 1
 print(check)
-check = [0, 0, 0]
+check = [0, 0]
 for i in range(lt):
         check[yt[i].numpy()] += 1
 print(check)
@@ -97,9 +97,9 @@ else:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(9, 96)
-        self.fc2 = nn.Linear(96, 48)
-        self.fc3 = nn.Linear(48, 3)
+        self.fc1 = nn.Linear(6, 12)
+        self.fc2 = nn.Linear(12, 4)
+        self.fc3 = nn.Linear(4, 2)
 
     def forward(self, x):
         x = self.fc1(x)
@@ -135,7 +135,7 @@ def evaluate():
     with torch.no_grad():
         for i in tqdm(range(len(eval_X))):
             real_class = eval_y[i].to(device)
-            net_out = net(eval_X[i].view(-1, 9).to(device))[0]  # returns a list
+            net_out = net(eval_X[i].view(-1, 6).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
             # print(real_class, net_out, predicted_class)
             # input()
@@ -148,11 +148,11 @@ def evaluate():
     total = 0
     # Xta = Xt[:1500]
     # yta = yt[:1500]
-    check = [0, 0, 0]
+    check = [0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
             real_class = yt[i].to(device)
-            net_out = net(Xt[i].view(-1, 9).to(device))[0]  # returns a list
+            net_out = net(Xt[i].view(-1, 6).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
             if predicted_class == real_class:
                 correct += 1
@@ -177,7 +177,7 @@ for epoch in range(EPOCHS):
         # Actual training
         net.zero_grad()
         optimizer.zero_grad()
-        outputs = net(batch_X.view(-1, 9))
+        outputs = net(batch_X.view(-1, 6))
         # print(batch_X, batch_y, outputs)
         # input()
         loss = loss_function(outputs, batch_y)
@@ -191,7 +191,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-25/3 MC only/intm_3.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/intm_3.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -212,8 +212,8 @@ plt.ylim([0, 1])
 plt.savefig(("intm_3.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# Max Out of Sample Accuracy: 0.822    3min 59s         9 - 192 - 96 - 3
-# Max Out of Sample Accuracy: 0.823    3min 57s         9 - 96 - 48 - 3
-# Max Out of Sample Accuracy: 0.822    3min 57s         9 - 48 - 24 - 3
-# Max Out of Sample Accuracy: 0.821    3min 58s         9 - 24 - 12 - 3
-# Max Out of Sample Accuracy: 0.806    3min 54s         9 - 12 - 6 - 3
+# Max Out of Sample Accuracy: 0.822    3min 59s         6 - 192 - 64 - 2
+# Max Out of Sample Accuracy: 0.914    3min 11s         6 - 96 - 32 - 2
+# Max Out of Sample Accuracy: 0.914    3min 11s         6 - 48 - 16 - 2
+# Max Out of Sample Accuracy: 0.914    3min 9s          6 - 24 - 8 - 2
+# Max Out of Sample Accuracy: 0.914    2min 57s         6 - 12 - 4 - 2
