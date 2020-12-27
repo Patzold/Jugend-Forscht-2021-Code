@@ -155,7 +155,7 @@ net = Net()
 net.to(device)
 print(net)
 
-optimizer = optim.SGD(net.parameters(), lr=0.01) #optim.Adam(net.parameters(), lr=0.01)
+optimizer = optim.Adam(net.parameters(), lr=0.001) #optim.SGD(net.parameters(), lr=0.01)
 loss_function = nn.CrossEntropyLoss()
 
 BATCH_SIZE = 100
@@ -233,7 +233,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/classes_rubt_1.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/classes_rubt_1_1.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -251,8 +251,11 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("classes_rubt_1.pdf")) #                                              <-- UPDATE
+plt.savefig(("classes_rubt_1_1.pdf")) #                                              <-- UPDATE
 plt.show()
 
 # Conv: 12, 24  FC: 200, 100
-# Max Out of Sample Accuracy: 0.920    7min 13s (Adam, 0.001)  (1)   <-- Selected
+# Max Out of Sample Accuracy: 0.920    7min 13s (SGD, 0.01)  (1)
+
+# Conv: 12, 24  FC: 200, 100
+# Max Out of Sample Accuracy: 0.947    7min 1s (Adam, 0.001)  (1_1)   <-- Selected
