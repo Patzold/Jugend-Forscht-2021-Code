@@ -31,7 +31,7 @@ categorys = [4, 5, 6, 7]
 train = []
 test = []
 
-if True:
+if False:
     for dir in tqdm(categorys):
         path = base_dir + str(dir) + "/comp/"
         for num, img in enumerate(os.listdir(path)):
@@ -39,9 +39,9 @@ if True:
                 img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
                 img_resz = cv2.resize(img_in, (224, 224))
                 if num < 2000:
-                    train.append([img_resz, (dir - 1)])
+                    train.append([img_resz, (dir - 4)])
                 else:
-                    test.append([img_resz, (dir - 1)])
+                    test.append([img_resz, (dir - 4)])
             except Exception as e: pass
         print(len(train), len(test))
 
@@ -96,7 +96,7 @@ Xt.to(torch.float32)
 yt.to(torch.int64)
 print(Xt.dtype, yt.dtype)
 print(y[:10], yt[:10])
-check = [0, 0, 0]
+check = [0, 0, 0, 0]
 for i in range(l):
     check[y[i].numpy()] += 1
 print(check)
@@ -118,7 +118,7 @@ class Net(nn.Module):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 12, 2)
         self.conv2 = nn.Conv2d(12, 24, 2)
-        self.dropout = nn.Dropout(0.05)
+        self.dropout = nn.Dropout(0.3)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
@@ -126,7 +126,7 @@ class Net(nn.Module):
 
         self.fc1 = nn.Linear(self._to_linear, 200) #flattening.
         self.fc2 = nn.Linear(200, 100)
-        self.fc3 = nn.Linear(100, 3)
+        self.fc3 = nn.Linear(100, 4)
 
     def convs(self, x):
             c1 = self.conv1(x)
@@ -154,7 +154,7 @@ net = Net()
 net.to(device)
 print(net)
 
-optimizer = optim.SGD(net.parameters(), lr=0.01) #optim.Adam(net.parameters(), lr=0.01)
+optimizer = optim.Adam(net.parameters(), lr=0.001) #optim.SGD(net.parameters(), lr=0.01)
 loss_function = nn.CrossEntropyLoss()
 
 BATCH_SIZE = 100
@@ -232,7 +232,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/classes_rubt_1.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/classes_pig_1.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -250,8 +250,14 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("classes_rubt_1.pdf")) #                                              <-- UPDATE
+plt.savefig(("classes_pig_1.pdf")) #                                              <-- UPDATE
 plt.show()
 
 # Conv: 12, 24  FC: 200, 100
-# Max Out of Sample Accuracy: 0.920    7min 13s (Adam, 0.001)  (1)   <-- Selected
+# Max Out of Sample Accuracy: 0.939    8min 57s (SGD, 0.01)
+
+# Conv: 12, 24  FC: 200, 100
+# Max Out of Sample Accuracy: 0.973    10min 1s (Adam, 0.001)  (1_1)   <-- Selected
+
+# Conv: 12, 24  FC: 200, 100
+# Max Out of Sample Accuracy: 0.983    9min 42s (Adam, 0.001; Dropout: 0.3)  (1)   <-- Selected
