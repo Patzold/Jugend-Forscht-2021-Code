@@ -1,5 +1,5 @@
 import os
-os.chdir("Classses")
+os.chdir("Classes")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -24,38 +24,37 @@ torch.cuda.manual_seed_all(seed)
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
 
-base_dir = "C:/Datasets/PJF-25/data/"
-save_dir = "C:/Datasets/PJF-25/safe/3 MC only/"
-nos = [["15", "16", "17", "18", "19", "20"], ["4", "5", "8", "9", "10", "11", "12"]] # LEGO, Bottles
-yes = ["0", "1", "2"]
+base_dir = "C:/Datasets/PJF-30/data/"
+save_dir = "C:/Datasets/PJF-30/safe/"
+nos = [4, 5, 6, 7] # Pig Head
+yes = [1, 2, 3]
 
 train = []
 test = []
 
-if True:
-    for indx, cat in tqdm(enumerate(nos)):
-        out_train = []
-        out_test = []
-        for subindx, subcat in tqdm(enumerate(nos[indx])):
-            path = base_dir + subcat + "/comp/"
-            for num, img in enumerate(os.listdir(path)):
-                try:
-                    img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
-                    img_resz = cv2.resize(img_in, (224, 224))
-                    if num < 2000:
-                        out_train.append([img_resz, 0])
-                    else:
-                        out_test.append([img_resz, 0])
-                except Exception as e: pass
-        random.shuffle(out_train)
-        random.shuffle(out_test)
-        train += out_train[:3000]
-        test += out_test[:750]
-        print(len(train), len(test), "\n")
+if False:
     out_train = []
     out_test = []
-    for indx, cat in tqdm(enumerate(yes)):
-        path = base_dir + cat + "/comp/"
+    for indx, dir in tqdm(enumerate(nos)):
+        path = base_dir + str(dir) + "/comp/"
+        for num, img in enumerate(os.listdir(path)):
+            try:
+                img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
+                img_resz = cv2.resize(img_in, (224, 224))
+                if num < 2000:
+                    out_train.append([img_resz, 0])
+                else:
+                    out_test.append([img_resz, 0])
+            except Exception as e: pass
+    random.shuffle(out_train)
+    random.shuffle(out_test)
+    train += out_train[:6000]
+    test += out_test[:1500]
+    print(len(train), len(test), "\n")
+    out_train = []
+    out_test = []
+    for indx, dir in tqdm(enumerate(yes)):
+        path = base_dir + str(dir) + "/comp/"
         for num, img in enumerate(os.listdir(path)):
             try:
                 img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
@@ -73,16 +72,16 @@ if True:
     print(len(train), len(test))
 
     # train = np.array(train)
-    pickle_out = open((save_dir + "rubt_1.pickle"),"wb")
+    pickle_out = open((save_dir + "classes_rubt_1.pickle"),"wb")
     pickle.dump(train, pickle_out)
     pickle_out.close()
-    pickle_out = open((save_dir + "rubt_1t.pickle"),"wb")
+    pickle_out = open((save_dir + "classes_rubt_1t.pickle"),"wb")
     pickle.dump(test, pickle_out)
     pickle_out.close()
 else:
-    pickle_in = open(save_dir + "rubt_1.pickle","rb")
+    pickle_in = open(save_dir + "classes_rubt_1.pickle","rb")
     train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "rubt_1t.pickle","rb")
+    pickle_in = open(save_dir + "classes_rubt_1t.pickle","rb")
     test = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
@@ -150,9 +149,9 @@ class Net(nn.Module):
         self._to_linear = None
         self.convs(x)
 
-        self.fc1 = nn.Linear(self._to_linear, 500) #flattening.
-        self.fc2 = nn.Linear(500, 100)
-        self.fc3 = nn.Linear(100, 2)
+        self.fc1 = nn.Linear(self._to_linear, 200) #flattening.
+        self.fc2 = nn.Linear(200, 150)
+        self.fc3 = nn.Linear(150, 2)
 
     def convs(self, x):
             c1 = self.conv1(x)
@@ -260,7 +259,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-25/3 MC only/rubt_1.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/classes_rubt_1_1.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -278,7 +277,18 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("rubt_1.pdf")) #                                              <-- UPDATE
+plt.savefig(("rubt_1_1.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# Max Out of Sample Accuracy: 0.935    11min
+# Conv: 32, 42  FC: 500, 100
+# Max Out of Sample Accuracy: 0.844    7min 47s (SGD, 0.1)
+# Max Out of Sample Accuracy: 0.848    8min 8s (Adam, 0.001)
+
+# Conv: 24, 32  FC: 400, 100
+# Max Out of Sample Accuracy: 0.899    9min 20s (Adam, 0.001)  (1)
+
+# Conv: 32, 64  FC: 200, 100
+# Max Out of Sample Accuracy: 0.897    9min 20s (Adam, 0.001)  (1_1)
+
+# Conv: 32, 64  FC: 200, 150
+# Max Out of Sample Accuracy: 0.897    9min 26s (Adam, 0.001)  (1_1)
