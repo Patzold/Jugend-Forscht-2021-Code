@@ -32,7 +32,7 @@ yes = [4, 5, 6, 7]
 train = []
 test = []
 
-if True:
+if False:
     out_train = []
     out_test = []
     for indx, dir in tqdm(enumerate(nos)):
@@ -141,16 +141,16 @@ else:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 32, 2)
-        self.conv2 = nn.Conv2d(32, 64, 2)
+        self.conv1 = nn.Conv2d(3, 42, 2)
+        self.conv2 = nn.Conv2d(42, 84, 2)
         self.dropout = nn.Dropout(0.75)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
         self.convs(x)
 
-        self.fc1 = nn.Linear(self._to_linear, 300) #flattening.
-        self.fc2 = nn.Linear(300, 100)
+        self.fc1 = nn.Linear(self._to_linear, 200) #flattening.
+        self.fc2 = nn.Linear(200, 100)
         self.fc3 = nn.Linear(100, 2)
 
     def convs(self, x):
@@ -281,4 +281,10 @@ plt.savefig(("pig_1.pdf")) #                                              <-- UP
 plt.show()
 
 # Conv: 32, 64  FC: 300, 100
-# Max Out of Sample Accuracy: 0.904    10min 52s (Adam, 0.001)  (1)  <-- Selected
+# Max Out of Sample Accuracy: 0.882    10min 34s (Adam, 0.001)
+
+# Conv: 32, 64  FC: 200, 100
+# Max Out of Sample Accuracy: 0.887    9min 50s (Adam, 0.001)  (1_1)
+
+# Conv: 42, 84  FC: 200, 100
+# Max Out of Sample Accuracy: 0.907    11min 11s (Adam, 0.001)  (1)   <-- Selected
