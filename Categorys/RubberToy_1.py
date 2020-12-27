@@ -1,5 +1,5 @@
 import os
-os.chdir("Classes")
+os.chdir("Categorys")
 import random
 import matplotlib.pyplot as plt
 import datetime
