@@ -1,5 +1,5 @@
 import os
-os.chdir("First Layer")
+os.chdir("FlexNet")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -9,7 +9,7 @@ import pickle
 from tqdm import tqdm
 import numpy as np
 
-import FirstLayer_convs_1 as fl
+import FirstLayer_convs as fl
 
 import torch
 from torchvision import datasets, models, transforms
@@ -26,8 +26,8 @@ torch.cuda.manual_seed_all(seed)
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
 
-base_dir = "C:/Datasets/PJF-25/data/"
-save_dir = "C:/Datasets/PJF-25/safe/3 MC only/"
+base_dir = "C:/Datasets/PJF-30/data/"
+save_dir = "C:/Datasets/PJF-30/safe/"
 categorys = [[1, 2, 3], [4, 5, 6, 7]]
 
 train = []
@@ -37,16 +37,16 @@ if False:
     for indx, cat in tqdm(enumerate(categorys)):
         out_train = []
         out_test = []
-        for subindx, subcat in tqdm(enumerate(cat)):
-            path = base_dir + subcat + "/comp/"
+        for subindx, dir in tqdm(enumerate(cat)):
+            path = base_dir + str(dir) + "/comp/"
             for num, img in enumerate(os.listdir(path)):
                 try:
                     img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
                     img_resz = cv2.resize(img_in, (224, 224))
                     if num < 2000:
-                        out_train.append([img_resz, indx, int(subcat)])
+                        out_train.append([img_resz, indx, dir])
                     else:
-                        out_test.append([img_resz, indx, int(subcat)])
+                        out_test.append([img_resz, indx, dir])
                 except Exception as e: pass
         random.shuffle(train)
         random.shuffle(test)
@@ -110,11 +110,11 @@ yt.to(torch.int64)
 print(Xt.dtype, yt.dtype)
 print(y[10:], yt[:10])
 
-check = [0, 0, 0]
+check = [0, 0]
 for i in range(l):
         check[y[i].numpy()] += 1
 print(check)
-check = [0, 0, 0]
+check = [0, 0]
 for i in range(lt):
         check[yt[i].numpy()] += 1
 print(check)
@@ -127,6 +127,6 @@ for i in tqdm(range(len(yt))):
     result = fl.run(Xt[i].view(-1, 3, 224, 224).to(device))
     intm.append([result, yt[i].cpu().numpy().tolist()])
 
-pickle_out = open((save_dir + "intm_3t_raw.pickle"),"wb")
+pickle_out = open((save_dir + "intm_1t_raw.pickle"),"wb")
 pickle.dump(intm, pickle_out)
 pickle_out.close()

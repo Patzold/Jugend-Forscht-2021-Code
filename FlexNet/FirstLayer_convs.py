@@ -1,5 +1,5 @@
 import os
-os.chdir("FlexNet/")
+# os.chdir("FlexNet/")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -114,7 +114,7 @@ def run(input_tensor):
         rubt_argmax = torch.argmax(rubt(input_tensor)).cpu().numpy().tolist()
         pig_out = pig(input_tensor).cpu().numpy().tolist()[0]
         pig_argmax = torch.argmax(pig(input_tensor).cpu()).numpy().tolist()
-        out = [rubt_argmax, pig_argmax] + rubt_out + pig_out  # v3
-        #out = [rubt_argmax, pig_argmax]  # v2
-        #out = rubt_out + pig_out  # v1
+        # out = [rubt_argmax, pig_argmax] + rubt_out + pig_out  # v3
+        # out = [rubt_argmax, pig_argmax]  # v2
+        out = rubt_out + pig_out  # v1
         return out

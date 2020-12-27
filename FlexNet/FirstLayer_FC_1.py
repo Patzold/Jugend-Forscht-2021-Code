@@ -1,5 +1,5 @@
 import os
-os.chdir("First Layer")
+os.chdir("FlexNet")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -24,8 +24,8 @@ torch.cuda.manual_seed_all(seed)
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
 
-base_dir = "C:/Datasets/PJF-25/data/"
-save_dir = "C:/Datasets/PJF-25/safe/3 MC only/"
+base_dir = "C:/Datasets/PJF-30/data/"
+save_dir = "C:/Datasets/PJF-30/safe/"
 
 pickle_in = open(save_dir + "intm_1_raw.pickle","rb")
 train = pickle.load(pickle_in)
@@ -66,11 +66,11 @@ yt.to(torch.int64)
 print(Xt.dtype, yt.dtype)
 print(y[10:], yt[:10])
 
-check = [0, 0, 0]
+check = [0, 0]
 for i in range(l):
         check[y[i].numpy()] += 1
 print(check)
-check = [0, 0, 0]
+check = [0, 0]
 for i in range(lt):
         check[yt[i].numpy()] += 1
 print(check)
@@ -90,9 +90,9 @@ else:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(6, 96) #flattening.
-        self.fc2 = nn.Linear(96, 48)
-        self.fc3 = nn.Linear(48, 3)
+        self.fc1 = nn.Linear(4, 12) #flattening.
+        self.fc2 = nn.Linear(12, 4)
+        self.fc3 = nn.Linear(4, 2)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -131,7 +131,7 @@ def evaluate():
     with torch.no_grad():
         for i in tqdm(range(len(eval_X))):
             real_class = eval_y[i].to(device)
-            net_out = net(eval_X[i].view(-1, 6).to(device))[0]  # returns a list
+            net_out = net(eval_X[i].view(-1, 4).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
             # print(real_class, net_out, predicted_class)
             # input()
@@ -148,7 +148,7 @@ def evaluate():
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
             real_class = yt[i].to(device)
-            net_out = net(Xt[i].view(-1, 6).to(device))[0]  # returns a list
+            net_out = net(Xt[i].view(-1, ).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
             if predicted_class == real_class:
                 correct += 1
@@ -173,7 +173,7 @@ for epoch in range(EPOCHS):
         # Actual training
         net.zero_grad()
         optimizer.zero_grad()
-        outputs = net(batch_X.view(-1, 6))
+        outputs = net(batch_X.view(-1, 4))
         # print(batch_y, outputs)
         # input()
         loss = loss_function(outputs, batch_y)
@@ -187,7 +187,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-25/3 MC only/intm_1.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/intm_1.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -208,10 +208,8 @@ plt.ylim([0, 1])
 plt.savefig(("intm_1.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# Max Out of Sample Accuracy: 0.823    4min 38s         6 - 192 - 96 - 3
-# Max Out of Sample Accuracy: 0.824    4min 33s         6 - 96 - 48 - 3
-# Max Out of Sample Accuracy: 0.823    4min 19s         6 - 48 - 24 - 3
-# Max Out of Sample Accuracy: 0.775    4min 24s         6 - 24 - 12 - 3
-# Max Out of Sample Accuracy: 0.745    4min 14s         6 - 12 - 6 - 3
-
-# Has been tested with 10 & 6 middle layers, as well as 50 & 10. No difference detected.
+# Max Out of Sample Accuracy: 0.823    4min 38s         4 - 192 - 96 - 2
+# Max Out of Sample Accuracy: 0.824    4min 33s         4 - 96 - 48 - 2
+# Max Out of Sample Accuracy: 0.823    4min 19s         4 - 48 - 24 - 2
+# Max Out of Sample Accuracy: 0.775    4min 24s         4 - 24 - 12 - 2
+# Max Out of Sample Accuracy: 0.745    4min 14s         4 - 12 - 4 - 2
