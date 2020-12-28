@@ -97,9 +97,9 @@ else:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(6, 192)
-        self.fc2 = nn.Linear(192, 64)
-        self.fc3 = nn.Linear(64, 2)
+        self.fc1 = nn.Linear(6, 12)
+        self.fc2 = nn.Linear(12, 4)
+        self.fc3 = nn.Linear(4, 2)
 
     def forward(self, x):
         x = self.fc1(x)

@@ -212,22 +212,24 @@ class Pigs(nn.Module):
 
 predicted_class = 0
 
+rubberts = RubberToys()
+rubberts.load_state_dict(torch.load("C:/Cache/PJF-30/classes_rubt_1_1.pt"))
+rubberts.to(device)
+rubberts.eval()
+
+pigs = Pigs()
+pigs.load_state_dict(torch.load("C:/Cache/PJF-30/classes_pig_1.pt"))
+pigs.to(device)
+pigs.eval()
+
 def predict(input_tensor):
     with torch.no_grad():
         intm = torch.from_numpy(np.array(create_intm(input_tensor))).to(torch.float32).to(device)
         predicted_category = torch.argmax(fc3(intm)).cpu().numpy().tolist()
         if predicted_category == 0:
-            rubberts = RubberToys()
-            rubberts.load_state_dict(torch.load("C:/Cache/PJF-30/classes_rubt_1_1.pt"))
-            rubberts.to(device)
-            rubberts.eval()
             predicted_class = torch.argmax(rubberts(input_tensor)).cpu().numpy().tolist() + 1
             return predicted_category, predicted_class
         elif predicted_category == 1:
-            pigs = Pigs()
-            pigs.load_state_dict(torch.load("C:/Cache/PJF-30/classes_pig_1.pt"))
-            pigs.to(device)
-            pigs.eval()
             predicted_class = torch.argmax(pigs(input_tensor)).cpu().numpy().tolist() + 4
             return predicted_category, predicted_class
         else:
