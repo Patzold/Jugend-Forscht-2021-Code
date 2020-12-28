@@ -33,7 +33,7 @@ categorys = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11, 12, 13]]
 train = []
 test = []
 
-if True:
+if False:
     for indx, cat in tqdm(enumerate(categorys)):
         out_train = []
         out_test = []
@@ -50,8 +50,8 @@ if True:
                 except Exception as e: pass
         random.shuffle(train)
         random.shuffle(test)
-        train += out_train[:6000]
-        test += out_test[:1500]
+        train += out_train #[:6000]
+        test += out_test #[:1500]
     print(len(train), len(test))
 
     # train = np.array(train)
@@ -125,16 +125,26 @@ total = 0
 class_correct = 0
 category_correct = 0
 
-for i in tqdm(range(len(Xt))):
-    input_tensor = Xt[i].view(-1, 3, 224, 224).to(device)
-    correct_class = yt[i].cpu().numpy().tolist()
+cat_check = [0, 0, 0]
+class_check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+for i in tqdm(range(len(X))):
+    input_tensor = X[i].view(-1, 3, 224, 224).to(device)
+    correct_class = y[i].cpu().numpy().tolist()
     predicted_category, predicted_class = flex.predict(input_tensor)
-    if predicted_category == ct[i]: category_correct += 1
-    if predicted_class == correct_class: class_correct += 1
+    if predicted_category == c[i]:
+        category_correct += 1
+        cat_check[predicted_category] += 1
+    if predicted_class == correct_class:
+        class_correct += 1
+        class_check[predicted_class-1] += 1
     total += 1
 
 print(total, category_correct, class_correct)
 print("--> ", round(category_correct / total, 3), round(class_correct / total, 3))
+print(cat_check, class_check)
 
-# Test: 3000, 2742, 2687  --> 0.914, 0.896
-# Train: 12000, 11903, 11893  --> 0.992, 0.991
+# Test: 6500, 5755, 5209  --> 0.885, 0.801      (1m 1s)
+#      Cat_Check: [1263, 1725, 2767]     Class_Check: [420, 446, 375, 453, 422, 406, 414, 408, 409, 403, 480, 232, 341]
+# Train: 26000, 25695, 24540  --> 0.988, 0.944    (3m 59s)
+#      Cat_Check: [5927, 7850, 11918]     Class_Check: [1967, 1977, 1974, 1975, 1961, 1952, 1962, 1935, 1892, 1908, 1996, 1314, 1727]
