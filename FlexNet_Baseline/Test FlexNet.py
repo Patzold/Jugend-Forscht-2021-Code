@@ -135,3 +135,5 @@ for i in tqdm(range(len(Xt))):
 
 print(total, category_correct, class_correct)
 print("--> ", round(category_correct / total, 3), round(class_correct / total, 3))
+
+# Test: 3000, 2742, 2687  --> 0.914, 0.896
