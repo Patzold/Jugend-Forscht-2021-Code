@@ -109,7 +109,7 @@ class Lego(nn.Module):
 
         self.fc1 = nn.Linear(self._to_linear, 300) #flattening.
         self.fc2 = nn.Linear(300, 100)
-        self.fc3 = nn.Linear(100, 6)
+        self.fc3 = nn.Linear(100, 2)
 
     def convs(self, x):
             c1 = self.conv1(x)
@@ -156,6 +156,6 @@ def run(input_tensor):
         lego_out = lego(input_tensor).cpu().numpy().tolist()[0]
         lego_argmax = torch.argmax(lego(input_tensor).cpu()).numpy().tolist()
         # out = [rubt_argmax, pig_argmax, lego_argmax] + rubt_out + pig_out + lego_out  # v3
-        # out = [rubt_argmax, pig_argmax, lego_argmax]  # v2
-        out = rubt_out + pig_out + lego_out  # v1
+        out = [rubt_argmax, pig_argmax, lego_argmax]  # v2
+        # out = rubt_out + pig_out + lego_out  # v1
         return out

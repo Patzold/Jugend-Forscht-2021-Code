@@ -120,14 +120,14 @@ for i in range(lt):
 print(check)
 
 print(fl.run(X[0].view(-1, 3, 224, 224).to(device)))
-input()
+
 intm = []
 
 for i in tqdm(range(len(y))):
     result = fl.run(X[i].view(-1, 3, 224, 224).to(device))
     intm.append([result, y[i].cpu().numpy().tolist()])
 
-pickle_out = open((save_dir + "lego_intm_1_raw.pickle"),"wb")
+pickle_out = open((save_dir + "lego_intm_2_raw.pickle"),"wb")
 pickle.dump(intm, pickle_out)
 pickle_out.close()
 
@@ -135,6 +135,6 @@ pickle_out.close()
 # intm 2t  35s
 # intm 3t  35s
 
-# intm 1t  2m 20s
-# intm 2t  2m 26s
-# intm 3t  2m 21s
+# intm 1  2m 20s
+# intm 2  2m 26s
+# intm 3  2m 21s

@@ -27,9 +27,9 @@ torch.backends.cudnn.deterministic = True
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
 
-pickle_in = open(save_dir + "intm_2_raw.pickle","rb")
+pickle_in = open(save_dir + "lego_intm_2_raw.pickle","rb")
 train = pickle.load(pickle_in)
-pickle_in = open(save_dir + "intm_2t_raw.pickle","rb")
+pickle_in = open(save_dir + "lego_intm_2t_raw.pickle","rb")
 test = pickle.load(pickle_in)
 
 l = len(train)
@@ -66,11 +66,11 @@ yt.to(torch.int64)
 print(Xt.dtype, yt.dtype)
 print(y[10:], yt[:10])
 
-check = [0, 0]
+check = [0, 0, 0]
 for i in range(l):
         check[y[i].numpy()] += 1
 print(check)
-check = [0, 0]
+check = [0, 0, 0]
 for i in range(lt):
         check[yt[i].numpy()] += 1
 print(check)
@@ -90,9 +90,9 @@ else:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(2, 192)
-        self.fc2 = nn.Linear(192, 64)
-        self.fc3 = nn.Linear(64, 2)
+        self.fc1 = nn.Linear(3, 12)
+        self.fc2 = nn.Linear(12, 4)
+        self.fc3 = nn.Linear(4, 3)
 
     def forward(self, x):
         x = self.fc1(x)
@@ -128,7 +128,7 @@ def evaluate():
     with torch.no_grad():
         for i in tqdm(range(len(eval_X))):
             real_class = eval_y[i].to(device)
-            net_out = net(eval_X[i].view(-1, 2).to(device))[0]  # returns a list
+            net_out = net(eval_X[i].view(-1, 3).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
             # print(real_class, net_out, predicted_class)
             # input()
@@ -141,11 +141,11 @@ def evaluate():
     total = 0
     # Xta = Xt[:1500]
     # yta = yt[:1500]
-    check = [0, 0]
+    check = [0, 0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
             real_class = yt[i].to(device)
-            net_out = net(Xt[i].view(-1, 2).to(device))[0]  # returns a list
+            net_out = net(Xt[i].view(-1, 3).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
             if predicted_class == real_class:
                 correct += 1
@@ -170,7 +170,7 @@ for epoch in range(EPOCHS):
         # Actual training
         net.zero_grad()
         optimizer.zero_grad()
-        outputs = net(batch_X.view(-1, 2))
+        outputs = net(batch_X.view(-1, 3))
         # print(batch_X, batch_y, outputs)
         # input()
         loss = loss_function(outputs, batch_y)
@@ -184,7 +184,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/intm_2.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/lego_intm_2.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -205,8 +205,8 @@ plt.ylim([0, 1])
 plt.savefig(("intm_2.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# Max Out of Sample Accuracy: 0.906    3min 8s          2 - 192 - 64 - 2
-# Max Out of Sample Accuracy: 0.906    3min 6s          2 - 96 - 32 - 2
-# Max Out of Sample Accuracy: 0.907    3min 11s         2 - 48 - 16 - 2
-# Max Out of Sample Accuracy: 0.906    2min 59s         2 - 24 - 8 - 2
-# Max Out of Sample Accuracy: 0.906    3min 2s          2 - 12 - 4 - 2
+# Max Out of Sample Accuracy: 0.906    3min 8s          3 - 192 - 64 - 3
+# Max Out of Sample Accuracy: 0.906    3min 6s          3 - 96 - 32 - 3
+# Max Out of Sample Accuracy: 0.907    3min 11s         3 - 48 - 16 - 3
+# Max Out of Sample Accuracy: 0.906    2min 59s         3 - 24 - 8 - 3
+# Max Out of Sample Accuracy: 0.906    3min 2s          3 - 12 - 4 - 3
