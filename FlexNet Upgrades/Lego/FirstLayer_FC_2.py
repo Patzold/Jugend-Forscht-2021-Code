@@ -90,9 +90,9 @@ else:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(3, 12)
-        self.fc2 = nn.Linear(12, 4)
-        self.fc3 = nn.Linear(4, 3)
+        self.fc1 = nn.Linear(3, 48)
+        self.fc2 = nn.Linear(48, 16)
+        self.fc3 = nn.Linear(16, 3)
 
     def forward(self, x):
         x = self.fc1(x)
@@ -205,8 +205,8 @@ plt.ylim([0, 1])
 plt.savefig(("intm_2.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# Max Out of Sample Accuracy: 0.906    3min 8s          3 - 192 - 64 - 3
-# Max Out of Sample Accuracy: 0.906    3min 6s          3 - 96 - 32 - 3
-# Max Out of Sample Accuracy: 0.907    3min 11s         3 - 48 - 16 - 3
-# Max Out of Sample Accuracy: 0.906    2min 59s         3 - 24 - 8 - 3
-# Max Out of Sample Accuracy: 0.906    3min 2s          3 - 12 - 4 - 3
+#  Max Out of Sample Accuracy: 0.906    3min 8s          3 - 192 - 64 - 3
+#  Max Out of Sample Accuracy: 0.906    3min 6s          3 - 96 - 32 - 3
+# Max Out of Sample Accuracy: 0.857    2min 57s         3 - 48 - 16 - 3
+# Max Out of Sample Accuracy: 0.857    2min 53s         3 - 24 - 8 - 3
+# Max Out of Sample Accuracy: 0.857    4min 53s         3 - 12 - 4 - 3

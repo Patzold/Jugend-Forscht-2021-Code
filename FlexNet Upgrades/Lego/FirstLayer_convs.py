@@ -155,7 +155,7 @@ def run(input_tensor):
         pig_argmax = torch.argmax(pig(input_tensor).cpu()).numpy().tolist()
         lego_out = lego(input_tensor).cpu().numpy().tolist()[0]
         lego_argmax = torch.argmax(lego(input_tensor).cpu()).numpy().tolist()
-        # out = [rubt_argmax, pig_argmax, lego_argmax] + rubt_out + pig_out + lego_out  # v3
-        out = [rubt_argmax, pig_argmax, lego_argmax]  # v2
+        out = [rubt_argmax, pig_argmax, lego_argmax] + rubt_out + pig_out + lego_out  # v3
+        # out = [rubt_argmax, pig_argmax, lego_argmax]  # v2
         # out = rubt_out + pig_out + lego_out  # v1
         return out
