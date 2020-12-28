@@ -141,16 +141,16 @@ else:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 42, 2)
-        self.conv2 = nn.Conv2d(42, 84, 2)
+        self.conv1 = nn.Conv2d(3, 32, 2)
+        self.conv2 = nn.Conv2d(32, 64, 2)
         self.dropout = nn.Dropout(0.75)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
         self.convs(x)
 
-        self.fc1 = nn.Linear(self._to_linear, 200) #flattening.
-        self.fc2 = nn.Linear(200, 100)
+        self.fc1 = nn.Linear(self._to_linear, 300) #flattening.
+        self.fc2 = nn.Linear(300, 100)
         self.fc3 = nn.Linear(100, 2)
 
     def convs(self, x):
@@ -259,7 +259,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_lego_1_1.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_lego_1.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -277,14 +277,14 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("lego_1_1.pdf")) #                                              <-- UPDATE
+plt.savefig(("lego_1.pdf")) #                                              <-- UPDATE
 plt.show()
 
 # Conv: 32, 64  FC: 300, 100
-# Max Out of Sample Accuracy: 0.922    21min 46s (Adam, 0.001) (1)   <-- Selected
+# Max Out of Sample Accuracy: 0.916    22min 46s (Adam, 0.001) (1)   <-- Selected
 
 # Conv: 32, 64  FC: 200, 100
-# Max Out of Sample Accuracy: 0.911    19min 38s (Adam, 0.001)
+# Max Out of Sample Accuracy: 0.907    20min 00s (Adam, 0.001)
 
 # Conv: 42, 84  FC: 200, 100
-# Max Out of Sample Accuracy: 0.917    23min 5s (Adam, 0.001)  (1_1)
+# Max Out of Sample Accuracy: 0.904    22min 50s (Adam, 0.001)  (1_1)
