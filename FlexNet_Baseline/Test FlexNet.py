@@ -125,11 +125,11 @@ total = 0
 class_correct = 0
 category_correct = 0
 
-for i in tqdm(range(len(Xt))):
-    input_tensor = Xt[i].view(-1, 3, 224, 224).to(device)
-    correct_class = yt[i].cpu().numpy().tolist()
+for i in tqdm(range(len(X))):
+    input_tensor = X[i].view(-1, 3, 224, 224).to(device)
+    correct_class = y[i].cpu().numpy().tolist()
     predicted_category, predicted_class = flex.predict(input_tensor)
-    if predicted_category == ct[i]: category_correct += 1
+    if predicted_category == c[i]: category_correct += 1
     if predicted_class == correct_class: class_correct += 1
     total += 1
 
@@ -137,3 +137,4 @@ print(total, category_correct, class_correct)
 print("--> ", round(category_correct / total, 3), round(class_correct / total, 3))
 
 # Test: 3000, 2742, 2687  --> 0.914, 0.896
+# Train: 12000, 11903, 11893  --> 0.992, 0.991
