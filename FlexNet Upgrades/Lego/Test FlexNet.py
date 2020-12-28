@@ -1,5 +1,5 @@
 import os
-# os.chdir("FlexNet")
+os.chdir("FlexNet Upgrades/Lego")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -28,12 +28,12 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-categorys = [[1, 2, 3], [4, 5, 6, 7]]
+categorys = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11, 12, 13]]
 
 train = []
 test = []
 
-if False:
+if True:
     for indx, cat in tqdm(enumerate(categorys)):
         out_train = []
         out_test = []
@@ -55,16 +55,16 @@ if False:
     print(len(train), len(test))
 
     # train = np.array(train)
-    pickle_out = open((save_dir + "fl.pickle"),"wb")
+    pickle_out = open((save_dir + "fl_lego.pickle"),"wb")
     pickle.dump(train, pickle_out)
     pickle_out.close()
-    pickle_out = open((save_dir + "fl_t.pickle"),"wb")
+    pickle_out = open((save_dir + "fl_lego_t.pickle"),"wb")
     pickle.dump(test, pickle_out)
     pickle_out.close()
 else:
-    pickle_in = open(save_dir + "fl.pickle","rb")
+    pickle_in = open(save_dir + "fl_lego.pickle","rb")
     train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "fl_t.pickle","rb")
+    pickle_in = open(save_dir + "fl_lego_t.pickle","rb")
     test = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
@@ -125,11 +125,11 @@ total = 0
 class_correct = 0
 category_correct = 0
 
-for i in tqdm(range(len(X))):
-    input_tensor = X[i].view(-1, 3, 224, 224).to(device)
-    correct_class = y[i].cpu().numpy().tolist()
+for i in tqdm(range(len(Xt))):
+    input_tensor = Xt[i].view(-1, 3, 224, 224).to(device)
+    correct_class = yt[i].cpu().numpy().tolist()
     predicted_category, predicted_class = flex.predict(input_tensor)
-    if predicted_category == c[i]: category_correct += 1
+    if predicted_category == ct[i]: category_correct += 1
     if predicted_class == correct_class: class_correct += 1
     total += 1
 
