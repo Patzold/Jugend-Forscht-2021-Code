@@ -118,7 +118,7 @@ class Net(nn.Module):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 12, 2)
         self.conv2 = nn.Conv2d(12, 24, 2)
-        self.dropout = nn.Dropout(0.5)
+        self.dropout = nn.Dropout(0.7)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
@@ -232,7 +232,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/classes_lego_1_1.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/classes_lego_1.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -250,14 +250,20 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("classes_lego_1_1.pdf")) #                                              <-- UPDATE
+plt.savefig(("classes_lego_1.pdf")) #                                              <-- UPDATE
 plt.show()
 
 # Conv: 12, 24  FC: 200, 100
 # Max Out of Sample Accuracy: 0.817    10min 46s (SGD, 0.01)
 
 # Conv: 12, 24  FC: 200, 100
-# Max Out of Sample Accuracy: 0.816    10min 44s (Adam, 0.001)  (1_1)   <-- Selected
+# Max Out of Sample Accuracy: 0.816    10min 44s (Adam, 0.001)
 
 # Conv: 12, 24  FC: 200, 100
-# Max Out of Sample Accuracy: 0.835    10min 48s (Adam, 0.001; Dropout: 0.5)  (1)   <-- Selected
+# Max Out of Sample Accuracy: 0.835    10min 48s (Adam, 0.001; Dropout: 0.5)  (1_1)   <-- Selected
+
+# Conv: 12, 24  FC: 200, 100
+# Max Out of Sample Accuracy: 0.809    11min 1s (Adam, 0.001, Dropout 0.3)
+
+# Conv: 12, 24  FC: 200, 100
+# Max Out of Sample Accuracy: 0.809    11min 1s (Adam, 0.001, Dropout 0.7) (1)
