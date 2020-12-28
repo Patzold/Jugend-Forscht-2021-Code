@@ -163,7 +163,7 @@ class RubberToys(nn.Module):
             
             if self._to_linear is None:
                 self._to_linear = pool2[0].shape[0]*pool2[0].shape[1]*pool2[0].shape[2]
-                print("to linear: ", self._to_linear)
+                # print("to linear: ", self._to_linear)
             return pool2
 
     def forward(self, x):
@@ -199,7 +199,7 @@ class Pigs(nn.Module):
             
             if self._to_linear is None:
                 self._to_linear = pool2[0].shape[0]*pool2[0].shape[1]*pool2[0].shape[2]
-                print("to linear: ", self._to_linear)
+                # print("to linear: ", self._to_linear)
             return pool2
 
     def forward(self, x):
@@ -216,7 +216,6 @@ def predict(input_tensor):
     with torch.no_grad():
         intm = torch.from_numpy(np.array(create_intm(input_tensor))).to(torch.float32).to(device)
         predicted_category = torch.argmax(fc3(intm)).cpu().numpy().tolist()
-        print(predicted_category)
         if predicted_category == 0:
             rubberts = RubberToys()
             rubberts.load_state_dict(torch.load("C:/Cache/PJF-30/classes_rubt_1_1.pt"))

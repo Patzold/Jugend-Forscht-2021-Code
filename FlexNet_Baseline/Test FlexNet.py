@@ -82,16 +82,16 @@ else:
     device = torch.device("cuda:0")
     print('CUDA is available!  Training on GPU ...')
 
-X, y, c, Xt, yt, c = [],  [], [],  [], [], []
+X, y, c, Xt, yt, ct = [],  [], [],  [], [], []
 
-for features, lables, subcat in train:
+for features, cat, clas in train:
     X.append(features)
-    y.append(lables)
-    c.append(subcat)
-for features, lables, subcat in test:
+    y.append(clas)
+    c.append(cat)
+for features, cat, clas in test:
     Xt.append(features)
-    yt.append(lables)
-    c.append(subcat)
+    yt.append(clas)
+    ct.append(cat)
 temp = np.array(y)
 print(np.max(temp))
 X = np.array(X, dtype=np.float32) / 255
@@ -112,17 +112,26 @@ yt.to(torch.int64)
 print(Xt.dtype, yt.dtype)
 print(y[10:], yt[:10])
 
-check = [0, 0]
-for i in range(l):
-        check[y[i].numpy()] += 1
-print(check)
-check = [0, 0]
-for i in range(lt):
-        check[yt[i].numpy()] += 1
-print(check)
+# check = [0, 0]
+# for i in range(l):
+#         check[c[i].numpy()] += 1
+# print(check)
+# check = [0, 0]
+# for i in range(lt):
+#         check[ct[i].numpy()] += 1
+# print(check)
 
-for i in range(len(X)):
-    input_tensor = X[i].view(-1, 3, 224, 224).to(device)
+total = 0
+class_correct = 0
+category_correct = 0
+
+for i in tqdm(range(len(Xt))):
+    input_tensor = Xt[i].view(-1, 3, 224, 224).to(device)
+    correct_class = yt[i].cpu().numpy().tolist()
     predicted_category, predicted_class = flex.predict(input_tensor)
-    print(predicted_category, predicted_class, y[i], c[i])
-    input()
+    if predicted_category == ct[i]: category_correct += 1
+    if predicted_class == correct_class: class_correct += 1
+    total += 1
+
+print(total, category_correct, class_correct)
+print("--> ", round(category_correct / total, 3), round(class_correct / total, 3))
