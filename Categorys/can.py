@@ -27,12 +27,12 @@ torch.backends.cudnn.deterministic = True
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
 nos = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] # Rubber Toy
-yes = [18, 19]
+yes = [18, 19, 20, 21]
 
 train = []
 test = []
 
-if True:
+if False:
     out_train = []
     out_test = []
     for indx, dir in tqdm(enumerate(nos)):
@@ -187,7 +187,7 @@ optimizer = optim.Adam(net.parameters(), lr=0.001)
 loss_function = nn.CrossEntropyLoss()
 
 BATCH_SIZE = 100
-EPOCHS = 100
+EPOCHS = 50
 
 train_log = []
 eval_size = int(len(X)*0.1)
@@ -284,5 +284,8 @@ plt.ylim([0, 1])
 plt.savefig(("can_1.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# Conv: 32, 64, 128  FC: 500, 100
-# Max Out of Sample Accuracy: 0.890    8min 19s (Adam, 0.001)  (1)   <-- Selected
+# Conv: 32, 64, 128  Drop: 0.8   FC: 700, 100
+# Max Out of Sample Accuracy: 0.884    11min 40s (Adam, 0.001)  (1)   <-- Selected
+
+# Conv: 50, 100, 200 Drop: 0.75  FC: 700, 100
+# Max Out of Sample Accuracy: 0.881    18min 03s (Adam, 0.001)  (1_1)
