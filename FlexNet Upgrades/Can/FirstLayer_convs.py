@@ -200,7 +200,7 @@ def run(input_tensor):
         lego_argmax = torch.argmax(lego(input_tensor).cpu()).numpy().tolist()
         can_out = can(input_tensor).cpu().numpy().tolist()[0]
         can_argmax = torch.argmax(can(input_tensor).cpu()).numpy().tolist()
-        out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax] + rubt_out + pig_out + lego_out + can_out # v3
+        # out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax] + rubt_out + pig_out + lego_out + can_out # v3
         # out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax]  # v2
-        # out = rubt_out + pig_out + lego_out + can_out  # v1
+        out = rubt_out + pig_out + lego_out + can_out  # v1
         return out

@@ -28,7 +28,7 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-categorys = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11, 12, 13]]
+categorys = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11, 12, 13], [18, 19, 20, 21]]
 
 train = []
 test = []
@@ -55,16 +55,16 @@ if False:
     print(len(train), len(test))
 
     # train = np.array(train)
-    pickle_out = open((save_dir + "fl_lego.pickle"),"wb")
+    pickle_out = open((save_dir + "fl_can.pickle"),"wb")
     pickle.dump(train, pickle_out)
     pickle_out.close()
-    pickle_out = open((save_dir + "fl_lego_t.pickle"),"wb")
+    pickle_out = open((save_dir + "fl_can_t.pickle"),"wb")
     pickle.dump(test, pickle_out)
     pickle_out.close()
 else:
-    pickle_in = open(save_dir + "fl_lego.pickle","rb")
+    pickle_in = open(save_dir + "fl_can.pickle","rb")
     train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "fl_lego_t.pickle","rb")
+    pickle_in = open(save_dir + "fl_can_t.pickle","rb")
     test = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
@@ -110,11 +110,11 @@ yt.to(torch.int64)
 print(Xt.dtype, yt.dtype)
 print(y[10:], yt[:10])
 
-check = [0, 0, 0]
+check = [0, 0, 0, 0]
 for i in range(l):
         check[y[i].numpy()] += 1
 print(check)
-check = [0, 0, 0]
+check = [0, 0, 0, 0]
 for i in range(lt):
         check[yt[i].numpy()] += 1
 print(check)
@@ -123,18 +123,18 @@ print(fl.run(X[0].view(-1, 3, 224, 224).to(device)))
 
 intm = []
 
-for i in tqdm(range(len(yt))):
-    result = fl.run(Xt[i].view(-1, 3, 224, 224).to(device))
-    intm.append([result, yt[i].cpu().numpy().tolist()])
+for i in tqdm(range(len(y))):
+    result = fl.run(X[i].view(-1, 3, 224, 224).to(device))
+    intm.append([result, y[i].cpu().numpy().tolist()])
 
-pickle_out = open((save_dir + "lego_intm_3t_raw.pickle"),"wb")
+pickle_out = open((save_dir + "can_intm_1_raw.pickle"),"wb")
 pickle.dump(intm, pickle_out)
 pickle_out.close()
 
-# intm 1t  34s
-# intm 2t  35s
-# intm 3t  35s
+# intm 1t  1m 5s
+# intm 2t  1m 5s
+# intm 3t  1m 5s
 
-# intm 1  2m 20s
-# intm 2  2m 26s
-# intm 3  2m 21s
+# intm 1  4m 26s
+# intm 2  4m 27s
+# intm 3  4m 25s

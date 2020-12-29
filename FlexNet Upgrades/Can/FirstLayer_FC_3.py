@@ -1,5 +1,5 @@
 import os
-os.chdir("FlexNet Upgrades/Lego")
+os.chdir("FlexNet Upgrades/Can")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -27,9 +27,9 @@ torch.backends.cudnn.deterministic = True
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
 
-pickle_in = open(save_dir + "lego_intm_3_raw.pickle","rb")
+pickle_in = open(save_dir + "can_intm_3_raw.pickle","rb")
 train = pickle.load(pickle_in)
-pickle_in = open(save_dir + "lego_intm_3t_raw.pickle","rb")
+pickle_in = open(save_dir + "can_intm_3t_raw.pickle","rb")
 test = pickle.load(pickle_in)
 
 l = len(train)
@@ -73,11 +73,11 @@ print(Xt.dtype, yt.dtype)
 print(y[10:], yt[:10])
 print(X[10:], Xt[:10])
 
-check = [0, 0, 0]
+check = [0, 0, 0, 0]
 for i in range(l):
         check[y[i].numpy()] += 1
 print(check)
-check = [0, 0, 0]
+check = [0, 0, 0, 0]
 for i in range(lt):
         check[yt[i].numpy()] += 1
 print(check)
@@ -97,9 +97,9 @@ else:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(9, 24)
-        self.fc2 = nn.Linear(24, 8)
-        self.fc3 = nn.Linear(8, 3)
+        self.fc1 = nn.Linear(12, 48)
+        self.fc2 = nn.Linear(48, 16)
+        self.fc3 = nn.Linear(16, 4)
 
     def forward(self, x):
         x = self.fc1(x)
@@ -135,7 +135,7 @@ def evaluate():
     with torch.no_grad():
         for i in tqdm(range(len(eval_X))):
             real_class = eval_y[i].to(device)
-            net_out = net(eval_X[i].view(-1, 9).to(device))[0]  # returns a list
+            net_out = net(eval_X[i].view(-1, 12).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
             # print(real_class, net_out, predicted_class)
             # input()
@@ -148,11 +148,11 @@ def evaluate():
     total = 0
     # Xta = Xt[:1500]
     # yta = yt[:1500]
-    check = [0, 0, 0]
+    check = [0, 0, 0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
             real_class = yt[i].to(device)
-            net_out = net(Xt[i].view(-1, 9).to(device))[0]  # returns a list
+            net_out = net(Xt[i].view(-1, 12).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
             if predicted_class == real_class:
                 correct += 1
@@ -177,7 +177,7 @@ for epoch in range(EPOCHS):
         # Actual training
         net.zero_grad()
         optimizer.zero_grad()
-        outputs = net(batch_X.view(-1, 9))
+        outputs = net(batch_X.view(-1, 12))
         # print(batch_X, batch_y, outputs)
         # input()
         loss = loss_function(outputs, batch_y)
@@ -191,7 +191,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/lego_intm_3.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/can_intm_3.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -214,6 +214,6 @@ plt.show()
 
  # Max Out of Sample Accuracy: 0.914    3min 12s         9 - 192 - 64 - 3
  # Max Out of Sample Accuracy: 0.914    3min 11s         9 - 96 - 32 - 3
-# Max Out of Sample Accuracy: 0.871    4min 48s         9 - 48 - 16 - 3
-# Max Out of Sample Accuracy: 0.871    4min 45s         9 - 24 - 8 - 3        <-- Selected
-# Max Out of Sample Accuracy: 0.869    4min 50s         9 - 12 - 4 - 3
+# Max Out of Sample Accuracy: 0.782    5min 7s         9 - 48 - 16 - 3
+# Max Out of Sample Accuracy: 0.783    5min 3s         9 - 24 - 8 - 3        <-- Selected
+ # Max Out of Sample Accuracy: 0.869    4min 50s         9 - 12 - 4 - 3
