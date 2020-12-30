@@ -1,5 +1,5 @@
 import os
-os.chdir("FlexNet Upgrades/Lego")
+os.chdir("FlexNet Upgrades/Can")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -28,7 +28,7 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-categorys = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11, 12, 13]]
+categorys = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11, 12, 13], [18, 19, 20, 21]]
 
 train = []
 test = []
@@ -55,16 +55,16 @@ if False:
     print(len(train), len(test))
 
     # train = np.array(train)
-    pickle_out = open((save_dir + "fl_lego.pickle"),"wb")
+    pickle_out = open((save_dir + "fl_can.pickle"),"wb")
     pickle.dump(train, pickle_out)
     pickle_out.close()
-    pickle_out = open((save_dir + "fl_lego_t.pickle"),"wb")
+    pickle_out = open((save_dir + "fl_can_t.pickle"),"wb")
     pickle.dump(test, pickle_out)
     pickle_out.close()
 else:
-    pickle_in = open(save_dir + "fl_lego.pickle","rb")
+    pickle_in = open(save_dir + "fl_can.pickle","rb")
     train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "fl_lego_t.pickle","rb")
+    pickle_in = open(save_dir + "fl_can_t.pickle","rb")
     test = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
@@ -125,16 +125,18 @@ total = 0
 class_correct = 0
 category_correct = 0
 
-cat_check = [0, 0, 0]
-class_check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+cat_check = [0, 0, 0, 0]
+cat_total = [0, 0, 0, 0]
+class_check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-for i in tqdm(range(len(Xt))):
-    input_tensor = Xt[i].view(-1, 3, 224, 224).to(device)
-    correct_class = yt[i].cpu().numpy().tolist()
+for i in tqdm(range(len(X))):
+    input_tensor = X[i].view(-1, 3, 224, 224).to(device)
+    correct_class = y[i].cpu().numpy().tolist()
     predicted_category, predicted_class = flex.predict(input_tensor)
-    if predicted_category == ct[i]:
+    if predicted_category == c[i]:
         category_correct += 1
         cat_check[predicted_category] += 1
+    cat_total[c[i]] += 1
     if predicted_class == correct_class:
         class_correct += 1
         class_check[predicted_class-1] += 1
@@ -143,8 +145,11 @@ for i in tqdm(range(len(Xt))):
 print(total, category_correct, class_correct)
 print("--> ", round(category_correct / total, 3), round(class_correct / total, 3))
 print(cat_check, class_check)
+print("Category accuracy: ", [round(cat_check[i] / cat_total[i], 3) for i in range(len(cat_total))])
 
-# Test: 6500, 5755, 5209  --> 0.885, 0.801      (1m 1s)
-#      Cat_Check: [1263, 1725, 2767]     Class_Check: [420, 446, 375, 453, 422, 406, 414, 408, 409, 403, 480, 232, 341]
-# Train: 26000, 25695, 24540  --> 0.988, 0.944    (3m 59s)
-#      Cat_Check: [5927, 7850, 11918]     Class_Check: [1967, 1977, 1974, 1975, 1961, 1952, 1962, 1935, 1892, 1908, 1996, 1314, 1727]
+# Test: 8500, 4744, 4248  --> 0.558, 0.5      (1m 45s)
+#      Cat_Check: [1215, 1736, 686, 1107]     Class_Check: [416, 412, 366, 454, 429, 408, 415, 186, 105, 125, 33, 85, 45, 0, 0, 0, 0, 263, 251, 90, 165]
+#      Category accuracy:  [0.81, 0.868, 0.229, 0.553]
+# Train: 34000, 20468, 20186  --> 0.602 0.594    (7m 11s)
+#      Cat_Check: [5843, 7874, 2292, 4459]     Class_Check: [1968, 1892, 1974, 1977, 1973, 1957, 1967, 596, 411, 440, 104, 394, 197, 0, 0, 0, 0, 1536, 1324, 654, 822]
+#      Category accuracy:  [0.974, 0.984, 0.191, 0.557]

@@ -260,4 +260,4 @@ plt.show()
 # Max Out of Sample Accuracy: 0.739    13min 6s (Adam, 0.001, Dropout 0.7) (1_1)
 
 # Conv: 50, 100  FC: 500, 100
-# Max Out of Sample Accuracy: 0.756    11min 30s (Adam, 0.001, Dropout 0.7) (1)
+# Max Out of Sample Accuracy: 0.756    11min 30s (Adam, 0.001, Dropout 0.7) (1)    <-- SELECTED

@@ -197,9 +197,11 @@ def create_intm(input_tensor):
         pig_argmax = torch.argmax(pig(input_tensor).cpu()).numpy().tolist()
         lego_out = lego(input_tensor).cpu().numpy().tolist()[0]
         lego_argmax = torch.argmax(lego(input_tensor).cpu()).numpy().tolist()
-        out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax] + rubt_out + pig_out + lego_out + can_out # v3
+        can_out = lego(input_tensor).cpu().numpy().tolist()[0]
+        can_argmax = torch.argmax(lego(input_tensor).cpu()).numpy().tolist()
+        # out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax] + rubt_out + pig_out + lego_out + can_out # v3
         # out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax]  # v2
-        # out = rubt_out + pig_out + lego_out + can_out  # v1
+        out = rubt_out + pig_out + lego_out + can_out  # v1
         return out
 
 class FC1(nn.Module):
@@ -329,6 +331,42 @@ class Legos(nn.Module):
         x = self.fc3(x)
         return x
 
+class Cans(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(3, 50, 2)
+        self.conv2 = nn.Conv2d(50, 100, 2)
+        self.dropout = nn.Dropout(0.7)
+        
+        x = torch.randn(224,224,3).view(-1,3,224,224)
+        self._to_linear = None
+        self.convs(x)
+
+        self.fc1 = nn.Linear(self._to_linear, 500) #flattening.
+        self.fc2 = nn.Linear(500, 100)
+        self.fc3 = nn.Linear(100, 4)
+
+    def convs(self, x):
+            c1 = self.conv1(x)
+            relu1 = F.relu(c1)
+            pool1 = F.max_pool2d(relu1, (2, 2))
+            c2 = self.conv2(pool1)
+            relu2 = F.relu(c2)
+            pool2 = F.max_pool2d(relu2, (2, 2))
+            
+            if self._to_linear is None:
+                self._to_linear = pool2[0].shape[0]*pool2[0].shape[1]*pool2[0].shape[2]
+                print("Classes: Cans loaded")
+            return pool2
+
+    def forward(self, x):
+        x = self.convs(x)
+        x = x.view(-1, self._to_linear)  # .view is reshape ... this flattens X before 
+        x = self.dropout(F.relu(self.fc1(x)))
+        x = self.dropout(F.relu(self.fc2(x)))
+        x = self.fc3(x)
+        return x
+
 rubberts = RubberToys()
 rubberts.load_state_dict(torch.load("C:/Cache/PJF-30/classes_rubt_1_1.pt"))
 rubberts.to(device)
@@ -344,12 +382,17 @@ legos.load_state_dict(torch.load("C:/Cache/PJF-30/classes_lego_1.pt"))
 legos.to(device)
 legos.eval()
 
+cans = Cans()
+cans.load_state_dict(torch.load("C:/Cache/PJF-30/classes_can_1.pt"))
+cans.to(device)
+cans.eval()
+
 predicted_class = 0
 
 def predict(input_tensor):
     with torch.no_grad():
         intm = torch.from_numpy(np.array(create_intm(input_tensor))).to(torch.float32).to(device)
-        predicted_category = torch.argmax(fc3(intm)).cpu().numpy().tolist()
+        predicted_category = torch.argmax(fc1(intm)).cpu().numpy().tolist()
         if predicted_category == 0:
             predicted_class = torch.argmax(rubberts(input_tensor)).cpu().numpy().tolist() + 1
             return predicted_category, predicted_class
@@ -360,7 +403,7 @@ def predict(input_tensor):
             predicted_class = torch.argmax(legos(input_tensor)).cpu().numpy().tolist() + 8
             return predicted_category, predicted_class
         elif predicted_category == 3:
-            predicted_class = torch.argmax(legos(input_tensor)).cpu().numpy().tolist() + 8
+            predicted_class = torch.argmax(cans(input_tensor)).cpu().numpy().tolist() + 18
             return predicted_category, predicted_class
         else:
             raise Exception("A serious problem just occoured.")
