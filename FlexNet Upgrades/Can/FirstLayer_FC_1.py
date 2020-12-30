@@ -211,7 +211,7 @@ plt.savefig(("intm_1.pdf")) #                                              <-- U
 plt.show()
 
  # Max Out of Sample Accuracy: 0.869    4min 14s         6 - 192 - 96 - 3
-# Max Out of Sample Accuracy: 0.792    4min 8s          8 - 96 - 48 - 4
+# Max Out of Sample Accuracy: 0.792    5min 43s          8 - 96 - 48 - 4
  # Max Out of Sample Accuracy: 0.870    4min 11s         6 - 48 - 24 - 3
-# Max Out of Sample Accuracy: 0.791    4min 43s         8 - 24 - 12 - 4
+# Max Out of Sample Accuracy: 0.791    5min 43s         8 - 24 - 12 - 4
  # Max Out of Sample Accuracy: 0.745    4min 11s         6 - 12 - 4 - 3
