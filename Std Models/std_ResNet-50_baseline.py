@@ -313,4 +313,4 @@ plt.ylim([0, 1])
 plt.savefig(("std_ResNet-50_baseline.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# Max Out of Sample Accuracy: 0.531            1h 9min 27s
+# Max Out of Sample Accuracy: 0.954            1h 51min 28s
