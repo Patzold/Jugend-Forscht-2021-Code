@@ -126,6 +126,7 @@ class_correct = 0
 category_correct = 0
 
 cat_check = [0, 0, 0]
+cat_total = [0, 0, 0]
 class_check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 for i in tqdm(range(len(Xt))):
@@ -135,6 +136,7 @@ for i in tqdm(range(len(Xt))):
     if predicted_category == ct[i]:
         category_correct += 1
         cat_check[predicted_category] += 1
+    cat_total[ct[i]] += 1
     if predicted_class == correct_class:
         class_correct += 1
         class_check[predicted_class-1] += 1
@@ -143,8 +145,11 @@ for i in tqdm(range(len(Xt))):
 print(total, category_correct, class_correct)
 print("--> ", round(category_correct / total, 3), round(class_correct / total, 3))
 print(cat_check, class_check)
+print("Category accuracy: ", [round(cat_check[i] / cat_total[i], 3) for i in range(len(cat_total))])
 
 # Test: 6500, 5755, 5209  --> 0.885, 0.801      (1m 1s)
 #      Cat_Check: [1263, 1725, 2767]     Class_Check: [420, 446, 375, 453, 422, 406, 414, 408, 409, 403, 480, 232, 341]
+#      Category accuracy:  [0.842, 0.863, 0.922]
 # Train: 26000, 25695, 24540  --> 0.988, 0.944    (3m 59s)
 #      Cat_Check: [5927, 7850, 11918]     Class_Check: [1967, 1977, 1974, 1975, 1961, 1952, 1962, 1935, 1892, 1908, 1996, 1314, 1727]
+#      Category accuracy:  [0.988, 0.981, 0.993]
