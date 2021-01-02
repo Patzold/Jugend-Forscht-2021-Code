@@ -59,7 +59,6 @@ class RubberToy(nn.Module):
         x = self.fc3(x)
         return x
 
-
 class PigHead(nn.Module):
     def __init__(self):
         super().__init__()
@@ -175,7 +174,7 @@ class Can(nn.Module):
 rubt, pig, lego, can = RubberToy(), PigHead(), Lego(), Can()
 rubt.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_rubt_1_1.pt"))
 pig.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_pig_1.pt"))
-lego.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_lego_1.pt"))
+lego.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_lego_2.pt"))
 can.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_can_1.pt"))
 rubt.to(device)
 pig.to(device)
@@ -200,7 +199,7 @@ def run(input_tensor):
         lego_argmax = torch.argmax(lego(input_tensor).cpu()).numpy().tolist()
         can_out = can(input_tensor).cpu().numpy().tolist()[0]
         can_argmax = torch.argmax(can(input_tensor).cpu()).numpy().tolist()
-        # out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax] + rubt_out + pig_out + lego_out + can_out # v3
+        out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax] + rubt_out + pig_out + lego_out + can_out # v3
         # out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax]  # v2
-        out = rubt_out + pig_out + lego_out + can_out  # v1
+        # out = rubt_out + pig_out + lego_out + can_out  # v1
         return out

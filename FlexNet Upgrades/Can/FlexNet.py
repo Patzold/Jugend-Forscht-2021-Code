@@ -174,7 +174,7 @@ class Can(nn.Module):
 rubt, pig, lego, can = RubberToy(), PigHead(), Lego(), Can()
 rubt.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_rubt_1_1.pt"))
 pig.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_pig_1.pt"))
-lego.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_lego_1.pt"))
+lego.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_lego_2.pt"))
 can.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_can_1.pt"))
 rubt.to(device)
 pig.to(device)
@@ -199,25 +199,36 @@ def create_intm(input_tensor):
         lego_argmax = torch.argmax(lego(input_tensor).cpu()).numpy().tolist()
         can_out = lego(input_tensor).cpu().numpy().tolist()[0]
         can_argmax = torch.argmax(lego(input_tensor).cpu()).numpy().tolist()
-        # out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax] + rubt_out + pig_out + lego_out + can_out # v3
+        out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax] + rubt_out + pig_out + lego_out + can_out # v3
         # out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax]  # v2
-        out = rubt_out + pig_out + lego_out + can_out  # v1
+        # out = rubt_out + pig_out + lego_out + can_out  # v1
         return out
 
-class FC1(nn.Module):
+# class FC1(nn.Module):
+#     def __init__(self):
+#         super().__init__()
+#         self.fc1 = nn.Linear(8, 96) #flattening.
+#         self.fc2 = nn.Linear(96, 48)
+#         self.fc3 = nn.Linear(48, 4)
+
+#     def forward(self, x):
+#         x = F.relu(self.fc1(x))
+#         x = F.relu(self.fc2(x))
+#         x = self.fc3(x)
+#         return x
+class FC3(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(8, 96) #flattening.
-        self.fc2 = nn.Linear(96, 48)
-        self.fc3 = nn.Linear(48, 4)
-
+        self.fc1 = nn.Linear(12, 24)
+        self.fc2 = nn.Linear(24, 8)
+        self.fc3 = nn.Linear(8, 4)
     def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
+        x = self.fc1(x)
+        x = self.fc2(x)
         x = self.fc3(x)
         return x
-fc1 = FC1()
-fc1.load_state_dict(torch.load("C:/Cache/PJF-30/can_intm_1.pt"))
+fc1 = FC3()
+fc1.load_state_dict(torch.load("C:/Cache/PJF-30/can_intm_3.pt"))
 fc1.to(device)
 fc1.eval()
 
@@ -403,7 +414,9 @@ def predict(input_tensor):
             predicted_class = torch.argmax(legos(input_tensor)).cpu().numpy().tolist() + 8
             return predicted_category, predicted_class
         elif predicted_category == 3:
-            predicted_class = torch.argmax(cans(input_tensor)).cpu().numpy().tolist() + 18
+            predicted_class = torch.argmax(cans(input_tensor)).cpu().numpy().tolist() + 14
+            print(predicted_category, predicted_class)
+            input()
             return predicted_category, predicted_class
         else:
             raise Exception("A serious problem just occoured.")

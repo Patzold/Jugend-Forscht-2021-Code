@@ -123,11 +123,11 @@ print(fl.run(X[0].view(-1, 3, 224, 224).to(device)))
 
 intm = []
 
-for i in tqdm(range(len(y))):
-    result = fl.run(X[i].view(-1, 3, 224, 224).to(device))
-    intm.append([result, y[i].cpu().numpy().tolist()])
+for i in tqdm(range(len(yt))):
+    result = fl.run(Xt[i].view(-1, 3, 224, 224).to(device))
+    intm.append([result, yt[i].cpu().numpy().tolist()])
 
-pickle_out = open((save_dir + "can_intm_1_raw.pickle"),"wb")
+pickle_out = open((save_dir + "can_intm_3t_raw.pickle"),"wb")
 pickle.dump(intm, pickle_out)
 pickle_out.close()
 

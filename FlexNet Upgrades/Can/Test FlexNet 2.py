@@ -28,29 +28,28 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-categorys = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11, 12, 13], [18, 19, 20, 21]]
+categorys = [18, 19, 20, 21]
 
 train = []
 test = []
 
-if False:
-    for indx, cat in tqdm(enumerate(categorys)):
+if True:
+    for indx, dir in tqdm(enumerate(categorys)):
         out_train = []
         out_test = []
-        for subindx, dir in tqdm(enumerate(cat)):
-            actual_class = dir
-            if actual_class > 13:
-                actual_class = actual_class - 4
-            path = base_dir + str(dir) + "/comp/"
-            for num, img in enumerate(os.listdir(path)):
-                try:
-                    img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
-                    img_resz = cv2.resize(img_in, (224, 224))
-                    if num < 2000:
-                        out_train.append([img_resz, indx, actual_class])
-                    else:
-                        out_test.append([img_resz, indx, actual_class])
-                except Exception as e: pass
+        actual_class = dir
+        if actual_class > 13:
+            actual_class = actual_class - 4
+        path = base_dir + str(dir) + "/comp/"
+        for num, img in enumerate(os.listdir(path)):
+            try:
+                img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
+                img_resz = cv2.resize(img_in, (224, 224))
+                if num < 2000:
+                    out_train.append([img_resz, indx, actual_class])
+                else:
+                    out_test.append([img_resz, indx, actual_class])
+            except Exception as e: pass
         random.shuffle(train)
         random.shuffle(test)
         train += out_train #[:6000]
@@ -58,17 +57,17 @@ if False:
     print(len(train), len(test))
 
     # train = np.array(train)
-    pickle_out = open((save_dir + "test_can.pickle"),"wb")
-    pickle.dump(train, pickle_out)
-    pickle_out.close()
-    pickle_out = open((save_dir + "test_can_t.pickle"),"wb")
-    pickle.dump(test, pickle_out)
-    pickle_out.close()
-else:
-    pickle_in = open(save_dir + "test_can.pickle","rb")
-    train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "test_can_t.pickle","rb")
-    test = pickle.load(pickle_in)
+#     pickle_out = open((save_dir + "test_can.pickle"),"wb")
+#     pickle.dump(train, pickle_out)
+#     pickle_out.close()
+#     pickle_out = open((save_dir + "test_can_t.pickle"),"wb")
+#     pickle.dump(test, pickle_out)
+#     pickle_out.close()
+# else:
+#     pickle_in = open(save_dir + "test_can.pickle","rb")
+#     train = pickle.load(pickle_in)
+#     pickle_in = open(save_dir + "test_can_t.pickle","rb")
+#     test = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
 print(len(train), len(test))
