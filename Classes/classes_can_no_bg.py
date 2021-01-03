@@ -31,7 +31,7 @@ categorys = [18, 19, 20, 21]
 train = []
 test = []
 
-if True:
+if False:
     for dir in tqdm(categorys):
         path = base_dir + str(dir)
         for num, img in enumerate(os.listdir(path)):
@@ -45,17 +45,17 @@ if True:
             except Exception as e: pass
         print(len(train), len(test))
 
-#     pickle_out = open((save_dir + "classes_can.pickle"),"wb")
-#     pickle.dump(train, pickle_out)
-#     pickle_out.close()
-#     pickle_out = open((save_dir + "classes_cant.pickle"),"wb")
-#     pickle.dump(test, pickle_out)
-#     pickle_out.close()
-# else:
-#     pickle_in = open(save_dir + "classes_can.pickle","rb")
-#     train = pickle.load(pickle_in)
-#     pickle_in = open(save_dir + "classes_cant.pickle","rb")
-#     test = pickle.load(pickle_in)
+    pickle_out = open((save_dir + "classes_nobg_can.pickle"),"wb")
+    pickle.dump(train, pickle_out)
+    pickle_out.close()
+    pickle_out = open((save_dir + "classes_nobg_cant.pickle"),"wb")
+    pickle.dump(test, pickle_out)
+    pickle_out.close()
+else:
+    pickle_in = open(save_dir + "classes_nobg_can.pickle","rb")
+    train = pickle.load(pickle_in)
+    pickle_in = open(save_dir + "classes_nobg_cant.pickle","rb")
+    test = pickle.load(pickle_in)
 l = len(train)
 check = [0, 0, 0, 0, 0, 0]
 for i in range(l):
@@ -116,9 +116,9 @@ else:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 50, 2)
-        self.conv2 = nn.Conv2d(50, 100, 2)
-        self.dropout = nn.Dropout(0.7)
+        self.conv1 = nn.Conv2d(3, 10, 2)
+        self.conv2 = nn.Conv2d(10, 20, 2)
+        self.dropout = nn.Dropout(0.25)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
@@ -232,7 +232,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        # torch.save(net.state_dict(), "C:/Cache/PJF-30/classes_can_1.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/classes_nobg_can_1.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -250,7 +250,7 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-# plt.savefig(("classes_can_1.pdf")) #                                              <-- UPDATE
+plt.savefig(("classes_nobg_can_1.pdf")) #                                              <-- UPDATE
 plt.show()
 
 # Conv: 50, 100  FC: 500, 100

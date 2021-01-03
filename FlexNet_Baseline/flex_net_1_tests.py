@@ -1,5 +1,5 @@
 import os
-os.chdir("flex_nets")
+os.chdir("FlexNet_Baseline")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -14,7 +14,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-import flex_net_1 as flex
+import FlexNet as flex
 
 # For reproducibility
 seed = 3
@@ -151,5 +151,5 @@ def autolabel(rects):
 # autolabel(rects2)
 
 fig.tight_layout()
-plt.savefig("FlexNet_1_1.png")
+# plt.savefig("FlexNet_1_1.png")
 plt.show()

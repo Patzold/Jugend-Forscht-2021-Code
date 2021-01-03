@@ -29,48 +29,50 @@ torch.backends.cudnn.deterministic = True
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
 # categorys = [18, 19, 20, 21]
-categorys = [8, 9, 10, 11, 12, 13]
+categorys = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11, 12, 13], [18, 19, 20, 21]]
 the_category = 2
 
 train = []
 test = []
 
-if True:
-    for dir in tqdm(categorys):
-        out_train = []
-        out_test = []
-        actual_class = dir
-        # if actual_class > 13:
-        #     actual_class = actual_class - 4
-        path = base_dir + str(dir) + "/comp/"
-        print(dir, actual_class)
-        for num, img in enumerate(os.listdir(path)):
-            try:
-                img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
-                img_resz = cv2.resize(img_in, (224, 224))
-                if num < 2000:
-                    out_train.append([img_resz, the_category, actual_class])
-                else:
-                    out_test.append([img_resz, the_category, actual_class])
-            except Exception as e: pass
-        random.shuffle(train)
-        random.shuffle(test)
-        train += out_train #[:6000]
-        test += out_test #[:1500]
+if False:
+    for indx, cat in enumerate(categorys):
+        if indx < 3: continue
+        for dir in tqdm(cat):
+            out_train = []
+            out_test = []
+            actual_class = dir
+            if actual_class > 13:
+                actual_class = actual_class - 4
+            path = base_dir + str(dir) + "/comp/"
+            print(indx, dir, actual_class)
+            for num, img in enumerate(os.listdir(path)):
+                try:
+                    img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
+                    img_resz = cv2.resize(img_in, (224, 224))
+                    if num < 2000:
+                        out_train.append([img_resz, indx, actual_class])
+                    else:
+                        out_test.append([img_resz, indx, actual_class])
+                except Exception as e: pass
+            random.shuffle(train)
+            random.shuffle(test)
+            train += out_train #[:6000]
+            test += out_test #[:1500]
     print(len(train), len(test))
 
-    # train = np.array(train)
-#     pickle_out = open((save_dir + "test_can.pickle"),"wb")
+#     train = np.array(train)
+#     pickle_out = open((save_dir + "test.pickle"),"wb")
 #     pickle.dump(train, pickle_out)
 #     pickle_out.close()
-#     pickle_out = open((save_dir + "test_can_t.pickle"),"wb")
+#     pickle_out = open((save_dir + "test_t.pickle"),"wb")
 #     pickle.dump(test, pickle_out)
 #     pickle_out.close()
-# else:
-#     pickle_in = open(save_dir + "test_can.pickle","rb")
-#     train = pickle.load(pickle_in)
-#     pickle_in = open(save_dir + "test_can_t.pickle","rb")
-#     test = pickle.load(pickle_in)
+else:
+    pickle_in = open(save_dir + "test.pickle","rb")
+    train = pickle.load(pickle_in)
+    pickle_in = open(save_dir + "test_t.pickle","rb")
+    test = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
 print(len(train), len(test))
@@ -123,11 +125,13 @@ category_correct = 0
 
 cat_check = [0, 0, 0, 0]
 cat_total = [0, 0, 0, 0]
+cat_full = [0, 0, 0, 0]
 
 for i in tqdm(range(len(Xt))):
     input_tensor = Xt[i].view(-1, 3, 224, 224).to(device)
     correct_class = yt[i].cpu().numpy().tolist()
     predicted_category = flex.predict(input_tensor)
+    cat_full[predicted_category] += 1
     if predicted_category == ct[i]:
         category_correct += 1
         cat_check[predicted_category] += 1
@@ -135,5 +139,5 @@ for i in tqdm(range(len(Xt))):
     total += 1
 
 print("--> ", round(category_correct / total, 3))
-print(cat_check, cat_total)
+print(cat_check, cat_total, cat_full)
 print("Category accuracy: ", [round(cat_check[i] / cat_total[i], 3) for i in range(len(cat_total))])

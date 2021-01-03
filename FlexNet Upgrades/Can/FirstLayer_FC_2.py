@@ -74,6 +74,7 @@ check = [0, 0, 0, 0]
 for i in range(lt):
         check[yt[i].numpy()] += 1
 print(check)
+print(len(X), len(y))
 
 train_on_gpu = torch.cuda.is_available()
 theCPU = torch.device("cpu")

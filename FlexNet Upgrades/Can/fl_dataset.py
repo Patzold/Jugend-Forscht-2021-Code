@@ -38,15 +38,18 @@ if False:
         out_train = []
         out_test = []
         for subindx, dir in tqdm(enumerate(cat)):
+            actual_class = dir
+            if actual_class > 13:
+                actual_class = actual_class - 4
             path = base_dir + str(dir) + "/comp/"
             for num, img in enumerate(os.listdir(path)):
                 try:
                     img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
                     img_resz = cv2.resize(img_in, (224, 224))
                     if num < 2000:
-                        out_train.append([img_resz, indx, dir])
+                        out_train.append([img_resz, indx, actual_class])
                     else:
-                        out_test.append([img_resz, indx, dir])
+                        out_test.append([img_resz, indx, actual_class])
                 except Exception as e: pass
         random.shuffle(train)
         random.shuffle(test)
@@ -126,8 +129,6 @@ intm = []
 for i in tqdm(range(len(yt))):
     result = fl.run(Xt[i].view(-1, 3, 224, 224).to(device))
     intm.append([result, yt[i].cpu().numpy().tolist()])
-    print([result, yt[i].cpu().numpy().tolist()])
-    input()
 
 pickle_out = open((save_dir + "can_intm_3t_raw.pickle"),"wb")
 pickle.dump(intm, pickle_out)
@@ -137,6 +138,6 @@ pickle_out.close()
 # intm 2t  1m 5s
 # intm 3t  1m 5s
 
-# intm 1  4m 26s
+# intm 1  4m 26s+
 # intm 2  4m 27s
 # intm 3  4m 25s

@@ -284,7 +284,7 @@ for epoch in range(EPOCHS):
         loss.backward()
         optimizer.step() # Does the update
 
-    torch.save(model.state_dict(), "C:/Cache/PJF-30/std_ResNet-50_can_CHECKPOINT.pt")
+    # torch.save(model.state_dict(), "C:/Cache/PJF-30/std_ResNet-50_can_CHECKPOINT.pt")
     print(f"Epoch: {epoch}. Loss: {loss}")
     isample, osample = evaluate()
     print("In-sample accuracy: ", isample, "  Out-of-sample accuracy: ", osample)
@@ -292,7 +292,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(model.state_dict(), "C:/Cache/PJF-30/std_ResNet-50_can.pt") #                                                  <-- UPDATE
+        # torch.save(model.state_dict(), "C:/Cache/PJF-30/std_ResNet-50_can.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -311,7 +311,7 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("std_ResNet-50_can.pdf")) #                                              <-- UPDATE
+# plt.savefig(("std_ResNet-50_can.pdf")) #                                              <-- UPDATE
 plt.show()
 
 # Max Out of Sample Accuracy: 0.922            6h 41min 26s
