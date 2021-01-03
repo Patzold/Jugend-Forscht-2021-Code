@@ -126,6 +126,7 @@ train_data = []
 log = []
 valid_loss_min = np.Inf # track change in validation loss
 valid_acc_min = 0
+check = [0, 0, 0, 0]
 
 def evaluate():
     net.eval()
@@ -147,7 +148,6 @@ def evaluate():
     total = 0
     # Xta = Xt[:1500]
     # yta = yt[:1500]
-    check = [0, 0, 0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
             real_class = yt[i].to(device)
@@ -158,8 +158,8 @@ def evaluate():
                 check[predicted_class.cpu().numpy()] += 1
             # else: cv2.imwrite(("D:/Datasets\stupid/test/i" + str(i) + ".jpg"), Xt[i].view(60, 60, 1).numpy())
             total += 1
-    print(check)
     out_of_sample_acc = round(correct/total, 3)
+    print(check)
     return in_sample_acc, out_of_sample_acc
 
 t0 = time.time()

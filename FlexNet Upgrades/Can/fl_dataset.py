@@ -126,6 +126,8 @@ intm = []
 for i in tqdm(range(len(yt))):
     result = fl.run(Xt[i].view(-1, 3, 224, 224).to(device))
     intm.append([result, yt[i].cpu().numpy().tolist()])
+    print([result, yt[i].cpu().numpy().tolist()])
+    input()
 
 pickle_out = open((save_dir + "can_intm_3t_raw.pickle"),"wb")
 pickle.dump(intm, pickle_out)
