@@ -138,16 +138,15 @@ class Preconv(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 32, 2)
-        self.conv2 = nn.Conv2d(32, 32, 2)
 
     def forward(self, x):
         c1 = self.conv1(x)
         relu1 = F.relu(c1)
-        c2 = self.conv2(relu1)
-        relu2 = F.relu(c2)
-        maxpool1 = F.max_pool2d(relu2, (2, 2))
+        maxpool1 = F.max_pool2d(relu1, (2, 2))
         return maxpool1
 preconv = Preconv()
+for param in preconv.parameters():
+    param.requires_grad = False
 
 vgg16 = models.vgg16(pretrained=True)
 
@@ -173,24 +172,20 @@ class Net(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv1 = nn.Conv2d(64, 64, 2)
-        self.conv2 = nn.Conv2d(64, 128, 2)
         self.dropout = nn.Dropout(0.75)
-        
+
         x = torch.randn(112,112,64).view(-1,64,112,112)
         self._to_linear = None
         self.convs(x)
 
-        self.fc1 = nn.Linear(self._to_linear, 300) #flattening.
-        self.fc2 = nn.Linear(300, 100)
+        self.fc1 = nn.Linear(self._to_linear, 200) #flattening.
+        self.fc2 = nn.Linear(200, 100)
         self.fc3 = nn.Linear(100, 2)
 
     def convs(self, x):
             c1 = self.conv1(x)
             relu1 = F.relu(c1)
-            pool1 = F.max_pool2d(relu1, (2, 2))
-            c2 = self.conv2(pool1)
-            relu2 = F.relu(c2)
-            pool2 = F.max_pool2d(relu2, (2, 2))
+            pool2 = F.max_pool2d(relu1, (2, 2))
             
             if self._to_linear is None:
                 self._to_linear = pool2[0].shape[0]*pool2[0].shape[1]*pool2[0].shape[2]
@@ -233,7 +228,7 @@ def evaluate():
     with torch.no_grad():
         for i in tqdm(range(len(eval_X))):
             real_class = eval_y[i].to(device)
-            preconv_out = preconv(eval_X.view(-1, 3, 112, 112).to(device))
+            preconv_out = preconv(eval_X[i].view(-1, 3, 112, 112).to(device))
             net_out = net(preconv_out.view(-1, 64, 112, 112))
             predicted_class = torch.argmax(net_out)
             if predicted_class == real_class:
@@ -249,7 +244,7 @@ def evaluate():
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
             real_class = yt[i].to(device)
-            preconv_out = preconv(Xt.view(-1, 3, 112, 112).to(device))
+            preconv_out = preconv(Xt[i].view(-1, 3, 112, 112).to(device))
             net_out = net(preconv_out.view(-1, 64, 112, 112))
             predicted_class = torch.argmax(net_out)
             if predicted_class == real_class:
@@ -291,7 +286,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        # torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_rubt_1_1.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/rnd_rubt_1.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
