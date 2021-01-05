@@ -233,7 +233,7 @@ def evaluate():
     with torch.no_grad():
         for i in tqdm(range(len(eval_X))):
             real_class = eval_y[i].to(device)
-            preconv_out = preconv(eval_X.view(-1, 3, 112, 112))
+            preconv_out = preconv(eval_X.view(-1, 3, 112, 112).to(device))
             net_out = net(preconv_out.view(-1, 64, 112, 112))
             predicted_class = torch.argmax(net_out)
             if predicted_class == real_class:
@@ -249,7 +249,7 @@ def evaluate():
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
             real_class = yt[i].to(device)
-            preconv_out = preconv(Xt.view(-1, 3, 112, 112))
+            preconv_out = preconv(Xt.view(-1, 3, 112, 112).to(device))
             net_out = net(preconv_out.view(-1, 64, 112, 112))
             predicted_class = torch.argmax(net_out)
             if predicted_class == real_class:
@@ -276,11 +276,11 @@ for epoch in range(EPOCHS):
         net.zero_grad()
         optimizer.zero_grad()
         preconv_out = preconv(batch_X.view(-1, 3, 224, 224))
-        print(preconv_out.shape)
+        # print(preconv_out.shape)
         outputs = net(preconv_out.view(100, 64, 112, 112))
-        print(outputs.shape, batch_y.shape)
+        # print(outputs.shape, batch_y.shape)
         loss = loss_function(outputs, batch_y)
-        input()
+        # input()
         loss.backward()
         optimizer.step() # Does the update
 
