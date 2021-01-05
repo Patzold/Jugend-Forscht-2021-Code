@@ -59,13 +59,66 @@ for i in range(lt):
 print(check)
 
 def chooser(inpt):
-    integers = y[:4]
-    floats = y[3:]
-    print(integers, floats)
+    integers = inpt[:4]
+    floats = inpt[4:]
+    cnt = integers.count(1)
+    if cnt == 1: return integers.index(1)
+    big = max(floats)
+    return int(round((floats.index(big) / 2), 0))
 
-print(len(X), len(y))
-print(len(X), len(y))
-input()
+def chooser_analytics(inpt):
+    integers = inpt[:4]
+    floats = inpt[4:]
+    cnt = integers.count(1)
+    if cnt == 1: return integers.index(1)
+    if cnt == 0: return 0
+    if cnt == 2: return 2
+    else: return 3
 
-chooser(X[0])
-print(y[0])
+total = 0
+correct = 0
+
+for i in range(len(yt)):
+    total += 1
+    if chooser(Xt[i]) == yt[i]:
+        correct += 1
+
+print("Simple:")
+print(total, correct)
+print(round(correct/total, 3))
+
+total = 0
+correct = 0
+
+for i in range(len(yt)):
+    total += 1
+    if chooser_analytics(Xt[i]) == yt[i]:
+        correct += 1
+
+print("Analytics")
+print(total, correct)
+print(round(correct/total, 3))
+
+# ANALYTICS
+# none = [0, 0, 0, 0]
+# one = [0, 0, 0, 0]
+# two = [0, 0, 0, 0]
+# three = [0, 0, 0, 0]
+# four = [0, 0, 0, 0]
+
+# for i in tqdm(range(len(y))):
+#     integers = X[i][:4]
+#     floats = X[i][4:]
+#     cnt = integers.count(1)
+#     if cnt == 0:
+#         none[y[i]] += 1
+#     if cnt == 1:
+#         one[y[i]] += 1
+#     if cnt == 2:
+#         two[y[i]] += 1
+#     if cnt == 3:
+#         three[y[i]] += 1
+#     if cnt == 4:
+#         four[y[i]] += 1
+
+# print(none, one, two, three, four)
