@@ -1,5 +1,5 @@
 import os
-os.chdir("Categorys")
+os.chdir("Categorys v2")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -26,13 +26,13 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-nos = [1, 2, 3, 4, 5, 6, 7] # Rubber Toy
+nos = [1, 2, 3, 4, 5, 6, 7]
 yes = [8, 9, 10, 11, 12, 13]
 
 train = []
 test = []
 
-if False:
+if True:
     out_train = []
     out_test = []
     for indx, dir in tqdm(enumerate(nos)):
@@ -42,14 +42,14 @@ if False:
                 img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
                 img_resz = cv2.resize(img_in, (224, 224))
                 if num < 2000:
-                    out_train.append([img_resz, 0])
+                    out_train.append([img_resz, np.eye(2)[indx]])
                 else:
-                    out_test.append([img_resz, 0])
+                    out_test.append([img_resz, np.eye(2)[indx]])
             except Exception as e: pass
     random.shuffle(out_train)
     random.shuffle(out_test)
-    train += out_train[:12000]
-    test += out_test[:3000]
+    train += out_train[:6000]
+    test += out_test[:1500]
     print(len(train), len(test), "\n")
     out_train = []
     out_test = []
@@ -60,28 +60,28 @@ if False:
                 img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
                 img_resz = cv2.resize(img_in, (224, 224))
                 if num < 2000:
-                    out_train.append([img_resz, 1])
+                    out_train.append([img_resz, np.eye(2)[indx]])
                 else:
-                    out_test.append([img_resz, 1])
+                    out_test.append([img_resz, np.eye(2)[indx]])
             except Exception as e: pass
     random.shuffle(out_train)
     random.shuffle(out_test)
-    train += out_train[:12000]
-    test += out_test[:3000]
+    train += out_train[:6000]
+    test += out_test[:1500]
     print(len(train), len(test))
     print(len(train), len(test))
 
     # train = np.array(train)
-    pickle_out = open((save_dir + "classes_lego_1.pickle"),"wb")
+    pickle_out = open((save_dir + "categorys2_lego_1.pickle"),"wb")
     pickle.dump(train, pickle_out)
     pickle_out.close()
-    pickle_out = open((save_dir + "classes_lego_1t.pickle"),"wb")
+    pickle_out = open((save_dir + "categorys2_lego_1t.pickle"),"wb")
     pickle.dump(test, pickle_out)
     pickle_out.close()
 else:
-    pickle_in = open(save_dir + "classes_lego_1.pickle","rb")
+    pickle_in = open(save_dir + "categorys2_lego_1.pickle","rb")
     train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "classes_lego_1t.pickle","rb")
+    pickle_in = open(save_dir + "categorys2_lego_1t.pickle","rb")
     test = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
@@ -98,32 +98,33 @@ for features, lables in test:
     Xt.append(features)
     yt.append(lables)
 temp = np.array(y)
-print(np.max(temp))
+# print(np.max(temp))
 X = np.array(X, dtype=np.float32) / 255
-y = np.array(y, dtype=np.int64)
+y = np.array(y, dtype=np.float32)
 Xt = np.array(Xt, dtype=np.float32) / 255
-yt = np.array(yt, dtype=np.int64)
+yt = np.array(yt, dtype=np.float32)
 print(np.max(X[0]), np.max(Xt[0]))
+print(y, y.shape, type(y[0]))
 
 X = torch.from_numpy(X)
 y = torch.from_numpy(y)
 X.to(torch.float32)
-y.to(torch.int64)
+y.to(torch.float32)
 print(X.dtype, y.dtype)
 Xt = torch.from_numpy(Xt)
 yt = torch.from_numpy(yt)
 Xt.to(torch.float32)
-yt.to(torch.int64)
+yt.to(torch.float32)
 print(Xt.dtype, yt.dtype)
 print(y[10:], yt[:10])
 
-check = [0, 0, 0, 0, 0, 0]
+check = [0, 0, 0]
 for i in range(l):
-        check[y[i].numpy()] += 1
+        check[np.argmax(y[i].numpy())] += 1
 print(check)
-check = [0, 0, 0, 0, 0, 0]
+check = [0, 0, 0]
 for i in range(lt):
-        check[yt[i].numpy()] += 1
+        check[np.argmax(yt[i].numpy())] += 1
 print(check)
 
 train_on_gpu = torch.cuda.is_available()
@@ -180,7 +181,7 @@ net.to(device)
 print(net)
 
 optimizer = optim.Adam(net.parameters(), lr=0.001)
-loss_function = nn.CrossEntropyLoss()
+loss_function = nn.MSELoss()
 
 BATCH_SIZE = 100
 EPOCHS = 50
@@ -202,7 +203,7 @@ def evaluate():
     total = 0
     with torch.no_grad():
         for i in tqdm(range(len(eval_X))):
-            real_class = eval_y[i].to(device)
+            real_class = torch.argmax(eval_y[i].to(device))
             net_out = net(eval_X[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
             # print(real_class, net_out, predicted_class)
@@ -219,9 +220,11 @@ def evaluate():
     check = [0, 0, 0, 0, 0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
-            real_class = yt[i].to(device)
+            real_class = torch.argmax(yt[i].to(device))
             net_out = net(Xt[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
+            # print(real_class, net_out, predicted_class)
+            # input()
             if predicted_class == real_class:
                 correct += 1
                 check[predicted_class.cpu().numpy()] += 1
@@ -246,7 +249,7 @@ for epoch in range(EPOCHS):
         net.zero_grad()
         optimizer.zero_grad()
         outputs = net(batch_X.view(-1, 3, 224, 224))
-        # print(batch_y, outputs)
+        # print(batch_y.type(), outputs.type())
         # input()
         loss = loss_function(outputs, batch_y)
         loss.backward()
@@ -259,7 +262,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_lego_1.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys2_lego_1.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -277,14 +280,8 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("lego_1.pdf")) #                                              <-- UPDATE
+plt.savefig(("2lego_1.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# Conv: 32, 64  FC: 300, 100
-# Max Out of Sample Accuracy: 0.916    22min 46s (Adam, 0.001) (1)   <-- Selected
-
-# Conv: 32, 64  FC: 200, 100
-# Max Out of Sample Accuracy: 0.907    20min 00s (Adam, 0.001)
-
-# Conv: 42, 84  FC: 200, 100
-# Max Out of Sample Accuracy: 0.904    22min 50s (Adam, 0.001)  (1_1)
+# Time spend: 6m 33s
+# In-sample: 98,9%   Out-of-sample: 97,6%

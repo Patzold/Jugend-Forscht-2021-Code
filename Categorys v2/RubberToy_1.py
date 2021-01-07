@@ -282,3 +282,6 @@ plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
 plt.savefig(("2rubt_1.pdf")) #                                              <-- UPDATE
 plt.show()
+
+# Time spend: 6m 22s
+# In-sample: 99,6%   Out-of-sample: 97,7
