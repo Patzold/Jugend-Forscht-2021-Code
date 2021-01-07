@@ -25,7 +25,7 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-categorys = [1, 2, 3]
+categorys = [1, 2, 3, 4, 5, 6, 7]
 
 train = []
 test = []
@@ -57,12 +57,12 @@ else:
     pickle_in = open(save_dir + "classes_rubtt.pickle","rb")
     test = pickle.load(pickle_in)
 l = len(train)
-check = [0, 0, 0]
+check = [0, 0, 0, 0, 0, 0, 0]
 for i in range(l):
     check[train[i][1]] += 1
 print(check)
 lt = len(test)
-check = [0, 0, 0]
+check = [0, 0, 0, 0, 0, 0, 0]
 for i in range(lt):
     check[test[i][1]] += 1
 print(check)
@@ -96,7 +96,7 @@ Xt.to(torch.float32)
 yt.to(torch.int64)
 print(Xt.dtype, yt.dtype)
 print(y[:10], yt[:10])
-check = [0, 0, 0]
+check = [0, 0, 0, 0, 0, 0, 0]
 for i in range(l):
     check[y[i].numpy()] += 1
 print(check)
@@ -206,7 +206,7 @@ class ResNet(nn.Module): # [3, 4, 6, 3]
 def ResNet50(img_channels=3, num_classes=3):
     return ResNet(block, [3, 4, 6, 3], img_channels, num_classes)
 
-model = ResNet50(3, 3)
+model = ResNet50(3, 7)
 # model.load_state_dict(torch.load('model_cifar.pt'))
 model.to(device)
 
@@ -246,7 +246,7 @@ def evaluate():
     total = 0
     Xta = Xt[:1500]
     yta = yt[:1500]
-    check = [0, 0, 0]
+    check = [0, 0, 0, 0, 0, 0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xta))):
             real_class = yta[i].to(device)
@@ -284,6 +284,7 @@ for epoch in range(EPOCHS):
         loss.backward()
         optimizer.step() # Does the update
 
+    torch.save(model.state_dict(), "C:/Cache/PJF-30/std_ResNet-50_baseline_CHECKPOINT.pt")
     print(f"Epoch: {epoch}. Loss: {loss}")
     isample, osample = evaluate()
     print("In-sample accuracy: ", isample, "  Out-of-sample accuracy: ", osample)
@@ -291,7 +292,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        # torch.save(model.state_dict(), "C:/Cache/PJF-30/std_ResNet-50_baseline.pt") #                                                  <-- UPDATE
+        torch.save(model.state_dict(), "C:/Cache/PJF-30/std_ResNet-50_baseline.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -310,8 +311,8 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-# plt.savefig(("std_ResNet-50_baseline.pdf")) #                                              <-- UPDATE
+plt.savefig(("std_ResNet-50_baseline.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# Max Out of Sample Accuracy: 0.954            1h 51min 28s
-# [468, 487, 476]
+# Max Out of Sample Accuracy: 0.959            3h 17min 23s
+# [203, 207, 181, 222, 201, 206, 219]
