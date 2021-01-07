@@ -27,18 +27,18 @@ base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
 categorys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 
-pickle_in = open(save_dir + "std_lego.pickle","rb")
+pickle_in = open(save_dir + "classes_rubt.pickle","rb")
 train = pickle.load(pickle_in)
-pickle_in = open(save_dir + "std_legot.pickle","rb")
+pickle_in = open(save_dir + "classes_rubtt.pickle","rb")
 test = pickle.load(pickle_in)
 
 l = len(train)
-check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+check = [0, 0, 0, 0, 0, 0, 0]
 for i in range(l):
     check[train[i][1]] += 1
 print(check)
 lt = len(test)
-check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+check = [0, 0, 0, 0, 0, 0, 0]
 for i in range(lt):
     check[test[i][1]] += 1
 print(check)
@@ -72,7 +72,7 @@ Xt.to(torch.float32)
 yt.to(torch.int64)
 print(Xt.dtype, yt.dtype)
 print(y[:10], yt[:10])
-check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+check = [0, 0, 0, 0, 0, 0, 0]
 for i in range(l):
     check[y[i].numpy()] += 1
 print(check)
@@ -182,14 +182,14 @@ class ResNet(nn.Module): # [3, 4, 6, 3]
 def ResNet50(img_channels=3, num_classes=17):
     return ResNet(block, [3, 4, 6, 3], img_channels, num_classes)
 
-model = ResNet50(3, 17)
-model.load_state_dict(torch.load("C:/Cache/PJF-30/std_ResNet-50_lego.pt"))
+model = ResNet50(3, 7)
+model.load_state_dict(torch.load("C:/Cache/PJF-30/std_ResNet-50_baseline.pt"))
 model.to(device)
 
 model.eval()
 correct = 0
 total = 0
-class_check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+class_check = [0, 0, 0, 0, 0, 0, 0]
 with torch.no_grad():
     for i in tqdm(range(len(X))):
         real_class = y[i].to(device)
@@ -204,7 +204,7 @@ print(class_check)
 print(total, correct, in_sample_acc)
 correct = 0
 total = 0
-class_check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+class_check = [0, 0, 0, 0, 0, 0, 0]
 with torch.no_grad():
     for i in tqdm(range(len(Xt))):
         real_class = yt[i].to(device)
@@ -218,8 +218,16 @@ out_of_sample_acc = round(correct/total, 3)
 print(class_check)
 print(total, correct, out_of_sample_acc)
 
+# Lego ResNet-50:
 # Train: 26000 25961 0.999
 #        [1999, 2000, 1995, 2000, 1999, 1999, 1996, 1998, 1999, 1998, 2000, 1996, 1982]
 
 # Test: 6500 5946 0.915
 #        [476, 492, 485, 484, 472, 475, 453, 453, 461, 475, 483, 398, 339]
+
+# Baseline ResNet-50:
+# Train: 14000 13988 0.999
+#        [1992, 2000, 1998, 2000, 1998, 2000, 2000]
+
+# Test: 3500 3363 0.961
+#        [472, 492, 473, 495, 476, 480, 475]

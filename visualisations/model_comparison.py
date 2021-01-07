@@ -3,14 +3,14 @@ os.chdir("visualisations")
 import matplotlib.pyplot as plt
 import numpy as np
 
-lables = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+lables = [1, 2, 3, 4, 5, 6, 7]
 # names = []
 
-one_val = [420, 446, 375, 453, 422, 406, 414, 408, 409, 403, 480, 232, 341]
-two_val = [476, 492, 485, 484, 472, 475, 453, 453, 461, 475, 483, 398, 339]
+one_val = [443, 449, 407, 481, 434, 473, 477]
+two_val = [472, 492, 473, 495, 476, 480, 475]
 
-one_perc = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-two_perc = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+one_perc = [0, 0, 0, 0, 0, 0, 0]
+two_perc = [0, 0, 0, 0, 0, 0, 0]
 
 for i in range(len(one_val)):
     if one_val[i] is not 0:
