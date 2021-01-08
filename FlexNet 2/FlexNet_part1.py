@@ -23,7 +23,7 @@ else:
     device = torch.device("cuda:0")
     print('CUDA is available!  Training on GPU ...')
 
-class RubberToy(nn.Module):
+class Net(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 32, 2)
@@ -48,7 +48,7 @@ class RubberToy(nn.Module):
             
             if self._to_linear is None:
                 self._to_linear = pool2[0].shape[0]*pool2[0].shape[1]*pool2[0].shape[2]
-                print("Category: RubberToy loaded")
+                print("to linear: ", self._to_linear)
             return pool2
 
     def forward(self, x):

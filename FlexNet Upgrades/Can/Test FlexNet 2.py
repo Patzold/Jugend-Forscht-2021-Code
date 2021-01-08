@@ -126,20 +126,31 @@ category_correct = 0
 cat_check = [0, 0, 0, 0]
 cat_total = [0, 0, 0, 0]
 cat_full = [0, 0, 0, 0]
-added = 0
+class_check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-for i in tqdm(range(len(Xt))):
-    input_tensor = Xt[i].view(-1, 3, 224, 224).to(device)
-    correct_class = yt[i].cpu().numpy().tolist()
-    predicted_category = flex.predict(input_tensor)
-    # added += to_added 
+for i in tqdm(range(len(X))):
+    input_tensor = X[i].view(-1, 3, 224, 224).to(device)
+    correct_class = y[i].cpu().numpy().tolist()
+    predicted_category, predicted_class = flex.predict(input_tensor)
     cat_full[predicted_category] += 1
-    if predicted_category == ct[i]:
+    if predicted_category == c[i]:
         category_correct += 1
         cat_check[predicted_category] += 1
-    cat_total[ct[i]] += 1
+    if predicted_class == correct_class:
+        class_correct += 1
+        class_check[predicted_class-1] += 1
+    cat_total[c[i]] += 1
     total += 1
-print(added)
-print("--> ", round(category_correct / total, 3))
+
+print("--> ", round(category_correct / total, 3), round(class_correct / total, 3))
 print(cat_check, cat_total, cat_full)
+print(class_check)
 print("Category accuracy: ", [round(cat_check[i] / cat_total[i], 3) for i in range(len(cat_total))])
+print("Class accuracy: ", [round(class_check[i] / 2500, 3) for i in range(len(class_check))])
+
+# Test: --> 0.634, 0.573      (1m 41s, 8500)
+#      Cat_Check: [1215, 1736, 686, 1107]     Class_Check: [416, 412, 366, 454, 429, 408, 415, 186, 105, 125, 33, 85, 45, 0, 0, 0, 0, 263, 251, 90, 165]
+#      Category accuracy:  [0.81, 0.868, 0.229, 0.553]
+# Train: --> 0.746, 0.712      (6m 56s, 34000)
+#      Cat_Check: [1215, 1736, 686, 1107]     Class_Check: [416, 412, 366, 454, 429, 408, 415, 186, 105, 125, 33, 85, 45, 0, 0, 0, 0, 263, 251, 90, 165]
+#      Category accuracy:  [0.951, 0.903, 0.905, 0.037]
