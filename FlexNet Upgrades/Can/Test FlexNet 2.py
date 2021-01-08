@@ -126,18 +126,20 @@ category_correct = 0
 cat_check = [0, 0, 0, 0]
 cat_total = [0, 0, 0, 0]
 cat_full = [0, 0, 0, 0]
+added = 0
 
 for i in tqdm(range(len(Xt))):
     input_tensor = Xt[i].view(-1, 3, 224, 224).to(device)
     correct_class = yt[i].cpu().numpy().tolist()
     predicted_category = flex.predict(input_tensor)
+    # added += to_added 
     cat_full[predicted_category] += 1
     if predicted_category == ct[i]:
         category_correct += 1
         cat_check[predicted_category] += 1
     cat_total[ct[i]] += 1
     total += 1
-
+print(added)
 print("--> ", round(category_correct / total, 3))
 print(cat_check, cat_total, cat_full)
 print("Category accuracy: ", [round(cat_check[i] / cat_total[i], 3) for i in range(len(cat_total))])

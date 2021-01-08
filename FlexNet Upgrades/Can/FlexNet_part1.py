@@ -215,13 +215,22 @@ class FC3(nn.Module):
         x = self.fc2(x)
         x = self.fc3(x)
         return x
-fc1 = FC3()
-fc1.load_state_dict(torch.load("C:/Cache/PJF-30/can_intm_3.pt"))
-fc1.to(device)
-fc1.eval()
+fc3 = FC3()
+fc3.load_state_dict(torch.load("C:/Cache/PJF-30/can_intm_3.pt"))
+fc3.to(device)
+fc3.eval()
+
+def chooser(inpt):
+    integers = inpt[:4]
+    floats = inpt[4:]
+    if integers.count(1) == 1:
+        return integers.index(1)
+    if integers.count(1) == 4:
+        return 3
+    return torch.argmax(fc3(torch.Tensor(inpt).to(torch.float32).to(device)))
 
 def predict(input_tensor):
     with torch.no_grad():
         intm = torch.from_numpy(np.array(create_intm(input_tensor))).to(torch.float32).to(device)
-        predicted_category = torch.argmax(fc1(intm)).cpu().numpy().tolist()
-        return predicted_category
+        predicted_category = chooser(intm.cpu().numpy().tolist())
+        return predicted_category#, check
