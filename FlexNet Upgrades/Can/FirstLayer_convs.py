@@ -15,6 +15,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+# For reproducibility
+seed = 3
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
+torch.cuda.manual_seed_all(seed)
+torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.deterministic = True
+
 train_on_gpu = torch.cuda.is_available()
 if not train_on_gpu:
     device = torch.device("cpu")

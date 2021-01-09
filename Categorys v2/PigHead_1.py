@@ -26,8 +26,9 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-nos = [1, 2, 3]
+nos = [1, 2, 3] #, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21]
 yes = [4, 5, 6, 7]
+all = [1, 2, 3, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21]
 
 train = []
 test = []
@@ -42,9 +43,9 @@ if True:
                 img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
                 img_resz = cv2.resize(img_in, (224, 224))
                 if num < 2000:
-                    out_train.append([img_resz, np.eye(2)[indx]])
+                    out_train.append([img_resz, np.eye(2)[0]])
                 else:
-                    out_test.append([img_resz, np.eye(2)[indx]])
+                    out_test.append([img_resz, np.eye(2)[0]])
             except Exception as e: pass
     random.shuffle(out_train)
     random.shuffle(out_test)
@@ -60,9 +61,9 @@ if True:
                 img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
                 img_resz = cv2.resize(img_in, (224, 224))
                 if num < 2000:
-                    out_train.append([img_resz, np.eye(2)[indx]])
+                    out_train.append([img_resz, np.eye(2)[1]])
                 else:
-                    out_test.append([img_resz, np.eye(2)[indx]])
+                    out_test.append([img_resz, np.eye(2)[1]])
             except Exception as e: pass
     random.shuffle(out_train)
     random.shuffle(out_test)
@@ -83,13 +84,41 @@ else:
     train = pickle.load(pickle_in)
     pickle_in = open(save_dir + "categorys2_pig_1t.pickle","rb")
     test = pickle.load(pickle_in)
+
+if True:
+    out_train = []
+    out_test = []
+    for indx, dir in tqdm(enumerate(all)):
+        path = base_dir + str(dir) + "/comp/"
+        for num, img in enumerate(os.listdir(path)):
+            try:
+                img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
+                img_resz = cv2.resize(img_in, (224, 224))
+                if num < 2000:
+                    out_train.append([img_resz, np.eye(2)[0]])
+                else:
+                    out_test.append([img_resz, np.eye(2)[0]])
+            except Exception as e: pass
+    random.shuffle(out_train)
+    random.shuffle(out_test)
+    pickle_out = open((save_dir + "cat_all_pig.pickle"),"wb")
+    pickle.dump(out_test, pickle_out)
+    pickle_out.close()
+    pickle_out = open((save_dir + "cat_all_pigt.pickle"),"wb")
+    pickle.dump(out_train, pickle_out)
+    pickle_out.close()
+else:
+    pickle_in = open(save_dir + "cat_all_pig.pickle","rb")
+    cat_all = pickle.load(pickle_in)
+    pickle_in = open(save_dir + "cat_all_pigt.pickle","rb")
+    cat_allt = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
 print(len(train), len(test))
 random.shuffle(train)
 random.shuffle(test)
 
-X, y, Xt, yt = [],  [], [],  []
+X, y, Xt, yt, ay, ax, ayt, axt = [], [], [], [], [], [], [], []
 
 for features, lables in train:
     X.append(features)
@@ -97,12 +126,22 @@ for features, lables in train:
 for features, lables in test:
     Xt.append(features)
     yt.append(lables)
+for features, lables in cat_all:
+    ax.append(features)
+    ay.append(lables)
+for features, lables in cat_allt:
+    axt.append(features)
+    ayt.append(lables)
 temp = np.array(y)
 # print(np.max(temp))
 X = np.array(X, dtype=np.float32) / 255
 y = np.array(y, dtype=np.float32)
 Xt = np.array(Xt, dtype=np.float32) / 255
 yt = np.array(yt, dtype=np.float32)
+ax = np.array(ax, dtype=np.float32) / 255
+ay = np.array(ay, dtype=np.float32)
+axt = np.array(axt, dtype=np.float32) / 255
+ayt = np.array(ayt, dtype=np.float32)
 print(np.max(X[0]), np.max(Xt[0]))
 print(y, y.shape, type(y[0]))
 
@@ -116,6 +155,14 @@ yt = torch.from_numpy(yt)
 Xt.to(torch.float32)
 yt.to(torch.float32)
 print(Xt.dtype, yt.dtype)
+ax = torch.from_numpy(ax)
+ay = torch.from_numpy(ay)
+ax.to(torch.float32)
+ay.to(torch.float32)
+axt = torch.from_numpy(axt)
+ayt = torch.from_numpy(ayt)
+axt.to(torch.float32)
+ayt.to(torch.float32)
 print(y[10:], yt[:10])
 
 check = [0, 0, 0]
@@ -230,7 +277,36 @@ def evaluate():
                 check[predicted_class.cpu().numpy()] += 1
             # else: cv2.imwrite(("D:/Datasets\stupid/test/i" + str(i) + ".jpg"), Xt[i].view(60, 60, 1).numpy())
             total += 1
-    print(check)
+    print(check, "--------------------------")
+    with torch.no_grad():
+        total = 0
+        correct = 0
+        check = [0, 0]
+        realcheck = [0, 0]
+        with torch.no_grad():
+            for i in tqdm(range(len(ay))):
+                real_class = torch.argmax(ay[i].to(device))
+                realcheck[real_class] += 1
+                net_out = net(ax[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
+                predicted_class = torch.argmax(net_out)
+                check[predicted_class] += 1
+                if predicted_class == real_class: correct += 1
+                total += 1
+        print("All: ", check, realcheck, total, correct)
+        total = 0
+        correct = 0
+        check = [0, 0]
+        realcheck = [0, 0]
+        with torch.no_grad():
+            for i in tqdm(range(len(ayt))):
+                real_class = torch.argmax(ayt[i].to(device))
+                realcheck[real_class] += 1
+                net_out = net(axt[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
+                predicted_class = torch.argmax(net_out)
+                check[predicted_class] += 1
+                if predicted_class == real_class: correct += 1
+                total += 1
+        print("All test: ", check, realcheck, total, correct)    
     out_of_sample_acc = round(correct/total, 3)
     return in_sample_acc, out_of_sample_acc
 
@@ -262,7 +338,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys2_pig_1.pt") #                                                  <-- UPDATE
+        # torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys2_pig_1.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -280,7 +356,7 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("2pig_1.pdf")) #                                              <-- UPDATE
+# plt.savefig(("2pig_1.pdf")) #                                              <-- UPDATE
 plt.show()
 
 # Time spend: 6m 21s

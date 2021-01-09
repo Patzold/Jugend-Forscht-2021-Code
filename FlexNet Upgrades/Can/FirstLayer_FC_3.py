@@ -126,7 +126,6 @@ train_data = []
 log = []
 valid_loss_min = np.Inf # track change in validation loss
 valid_acc_min = 0
-check = [0, 0, 0, 0]
 
 def evaluate():
     net.eval()
@@ -148,6 +147,7 @@ def evaluate():
     total = 0
     # Xta = Xt[:1500]
     # yta = yt[:1500]
+    check = [0, 0, 0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
             real_class = yt[i].to(device)
