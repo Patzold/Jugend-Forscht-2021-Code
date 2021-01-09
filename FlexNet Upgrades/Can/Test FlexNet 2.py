@@ -128,9 +128,9 @@ cat_total = [0, 0, 0, 0]
 cat_full = [0, 0, 0, 0]
 class_check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-for i in tqdm(range(len(X))):
-    input_tensor = X[i].view(-1, 3, 224, 224).to(device)
-    correct_class = y[i].cpu().numpy().tolist()
+for i in tqdm(range(len(Xt))):
+    input_tensor = Xt[i].view(-1, 3, 224, 224).to(device)
+    correct_class = yt[i].cpu().numpy().tolist()
     predicted_category, predicted_class = flex.predict(input_tensor)
     cat_full[predicted_category] += 1
     if predicted_category == c[i]:
