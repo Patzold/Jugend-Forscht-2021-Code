@@ -26,14 +26,14 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-nos = [1, 2, 3] #, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21]
+nos = [1, 2, 3, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21]
 yes = [4, 5, 6, 7]
 all = [1, 2, 3, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21]
 
 train = []
 test = []
 
-if True:
+if False:
     out_train = []
     out_test = []
     for indx, dir in tqdm(enumerate(nos)):
@@ -67,22 +67,22 @@ if True:
             except Exception as e: pass
     random.shuffle(out_train)
     random.shuffle(out_test)
-    train += out_train[:3500]
+    train += out_train[:4000]
     test += out_test[:1500]
     print(len(train), len(test))
     print(len(train), len(test))
 
     # train = np.array(train)
-    pickle_out = open((save_dir + "categorys2_pig_1.pickle"),"wb")
+    pickle_out = open((save_dir + "categorys2_pig_2.pickle"),"wb")
     pickle.dump(train, pickle_out)
     pickle_out.close()
-    pickle_out = open((save_dir + "categorys2_pig_1t.pickle"),"wb")
+    pickle_out = open((save_dir + "categorys2_pig_2t.pickle"),"wb")
     pickle.dump(test, pickle_out)
     pickle_out.close()
 else:
-    pickle_in = open(save_dir + "categorys2_pig_1.pickle","rb")
+    pickle_in = open(save_dir + "categorys2_pig_2.pickle","rb")
     train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "categorys2_pig_1t.pickle","rb")
+    pickle_in = open(save_dir + "categorys2_pig_2t.pickle","rb")
     test = pickle.load(pickle_in)
 
 if False:
@@ -102,10 +102,10 @@ if False:
     random.shuffle(out_train)
     random.shuffle(out_test)
     pickle_out = open((save_dir + "cat_all_pig.pickle"),"wb")
-    pickle.dump(out_test, pickle_out)
+    pickle.dump(out_train, pickle_out)
     pickle_out.close()
     pickle_out = open((save_dir + "cat_all_pigt.pickle"),"wb")
-    pickle.dump(out_train, pickle_out)
+    pickle.dump(out_test, pickle_out)
     pickle_out.close()
 else:
     pickle_in = open(save_dir + "cat_all_pig.pickle","rb")
@@ -279,7 +279,8 @@ def evaluate():
                 check[predicted_class.cpu().numpy()] += 1
             # else: cv2.imwrite(("D:/Datasets\stupid/test/i" + str(i) + ".jpg"), Xt[i].view(60, 60, 1).numpy())
             total += 1
-    print(check, realcheck "--------------------------")
+    print(check, realcheck, total, correct, "--------------------------")
+    out_of_sample_acc = round(correct/total, 3)
     with torch.no_grad():
         total = 0
         correct = 0
@@ -287,7 +288,7 @@ def evaluate():
         realcheck = [0, 0]
         print("Predicted Class distribution - real class distribution - total, correct")
         with torch.no_grad():
-            for i in(range(len(ay)):
+            for i in range(len(ay)):
                 real_class = torch.argmax(ay[i].to(device))
                 realcheck[real_class] += 1
                 net_out = net(ax[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
@@ -310,7 +311,6 @@ def evaluate():
                 if predicted_class == real_class: correct += 1
                 total += 1
         print("All test: ", check, realcheck, total, correct)    
-    out_of_sample_acc = round(correct/total, 3)
     return in_sample_acc, out_of_sample_acc
 
 t0 = time.time()
@@ -362,5 +362,9 @@ plt.ylim([0, 1])
 # plt.savefig(("2pig_1.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# Time spend: 6m 21s
-# In-sample: 99,0%   Out-of-sample: 98,0%
+# [988, 958] [1000, 1000] 2000 1946 --------------------------
+# Predicted Class distribution - real class distribution - total, correct
+# All:  [5672, 828] [6500, 0] 6500 5672
+# All test:  [23034, 2966] [26000, 0] 26000 23034
+# In-sample accuracy:  0.996   Out-of-sample accuracy:  0.973
+# Time spend: 54m
