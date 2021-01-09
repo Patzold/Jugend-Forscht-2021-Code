@@ -67,7 +67,7 @@ if True:
             except Exception as e: pass
     random.shuffle(out_train)
     random.shuffle(out_test)
-    train += out_train[:6000]
+    train += out_train[:3500]
     test += out_test[:1500]
     print(len(train), len(test))
     print(len(train), len(test))
@@ -85,7 +85,7 @@ else:
     pickle_in = open(save_dir + "categorys2_pig_1t.pickle","rb")
     test = pickle.load(pickle_in)
 
-if True:
+if False:
     out_train = []
     out_test = []
     for indx, dir in tqdm(enumerate(all)):
@@ -264,10 +264,12 @@ def evaluate():
     total = 0
     # Xta = Xt[:1500]
     # yta = yt[:1500]
-    check = [0, 0, 0, 0, 0, 0]
+    check = [0, 0]
+    realcheck = [0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
             real_class = torch.argmax(yt[i].to(device))
+            realcheck[real_class] += 1
             net_out = net(Xt[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
             # print(real_class, net_out, predicted_class)
@@ -277,14 +279,15 @@ def evaluate():
                 check[predicted_class.cpu().numpy()] += 1
             # else: cv2.imwrite(("D:/Datasets\stupid/test/i" + str(i) + ".jpg"), Xt[i].view(60, 60, 1).numpy())
             total += 1
-    print(check, "--------------------------")
+    print(check, realcheck "--------------------------")
     with torch.no_grad():
         total = 0
         correct = 0
         check = [0, 0]
         realcheck = [0, 0]
+        print("Predicted Class distribution - real class distribution - total, correct")
         with torch.no_grad():
-            for i in tqdm(range(len(ay))):
+            for i in(range(len(ay)):
                 real_class = torch.argmax(ay[i].to(device))
                 realcheck[real_class] += 1
                 net_out = net(ax[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
@@ -298,7 +301,7 @@ def evaluate():
         check = [0, 0]
         realcheck = [0, 0]
         with torch.no_grad():
-            for i in tqdm(range(len(ayt))):
+            for i in range(len(ayt)):
                 real_class = torch.argmax(ayt[i].to(device))
                 realcheck[real_class] += 1
                 net_out = net(axt[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
