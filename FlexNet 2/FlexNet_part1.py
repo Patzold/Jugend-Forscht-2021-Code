@@ -23,7 +23,7 @@ else:
     device = torch.device("cuda:0")
     print('CUDA is available!  Training on GPU ...')
 
-class Net(nn.Module):
+class RubberToy(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 32, 2)
@@ -62,16 +62,16 @@ class Net(nn.Module):
 class PigHead(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 42, 2)
-        self.conv2 = nn.Conv2d(42, 84, 2)
+        self.conv1 = nn.Conv2d(3, 32, 2)
+        self.conv2 = nn.Conv2d(32, 64, 2)
         self.dropout = nn.Dropout(0.75)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
         self.convs(x)
 
-        self.fc1 = nn.Linear(self._to_linear, 200) #flattening.
-        self.fc2 = nn.Linear(200, 100)
+        self.fc1 = nn.Linear(self._to_linear, 300) #flattening.
+        self.fc2 = nn.Linear(300, 100)
         self.fc3 = nn.Linear(100, 2)
 
     def convs(self, x):
@@ -84,7 +84,7 @@ class PigHead(nn.Module):
             
             if self._to_linear is None:
                 self._to_linear = pool2[0].shape[0]*pool2[0].shape[1]*pool2[0].shape[2]
-                print("Category: PigHead loaded")
+                print("to linear: ", self._to_linear)
             return pool2
 
     def forward(self, x):
@@ -120,7 +120,7 @@ class Lego(nn.Module):
             
             if self._to_linear is None:
                 self._to_linear = pool2[0].shape[0]*pool2[0].shape[1]*pool2[0].shape[2]
-                print("Category: Lego loaded")
+                print("to linear: ", self._to_linear)
             return pool2
 
     def forward(self, x):
@@ -136,32 +136,28 @@ class Can(nn.Module):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 32, 2)
         self.conv2 = nn.Conv2d(32, 64, 2)
-        self.conv3 = nn.Conv2d(64, 128, 2)
-        self.dropout = nn.Dropout(0.8)
+        self.dropout = nn.Dropout(0.75)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
         self.convs(x)
 
-        self.fc1 = nn.Linear(self._to_linear, 700) #flattening.
-        self.fc2 = nn.Linear(700, 100)
+        self.fc1 = nn.Linear(self._to_linear, 500) #flattening.
+        self.fc2 = nn.Linear(500, 100)
         self.fc3 = nn.Linear(100, 2)
 
     def convs(self, x):
-            x = self.conv1(x)
-            x = F.relu(x)
-            x = F.max_pool2d(x, (2, 2))
-            x = self.conv2(x)
-            x = F.relu(x)
-            x = F.max_pool2d(x, (2, 2))
-            x = self.conv3(x)
-            x = F.relu(x)
-            x = F.max_pool2d(x, (2, 2))
+            c1 = self.conv1(x)
+            relu1 = F.relu(c1)
+            pool1 = F.max_pool2d(relu1, (2, 2))
+            c2 = self.conv2(pool1)
+            relu2 = F.relu(c2)
+            pool2 = F.max_pool2d(relu2, (2, 2))
             
             if self._to_linear is None:
-                self._to_linear = x[0].shape[0]*x[0].shape[1]*x[0].shape[2]
-                print("Category: Can loaded")
-            return x
+                self._to_linear = pool2[0].shape[0]*pool2[0].shape[1]*pool2[0].shape[2]
+                print("to linear: ", self._to_linear)
+            return pool2
 
     def forward(self, x):
         x = self.convs(x)
@@ -172,10 +168,10 @@ class Can(nn.Module):
         return x
 
 rubt, pig, lego, can = RubberToy(), PigHead(), Lego(), Can()
-rubt.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_rubt_1_1.pt"))
-pig.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_pig_1.pt"))
-lego.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_lego_2.pt"))
-can.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_can_1.pt"))
+rubt.load_state_dict(torch.load("C:/Cache/PJF-30/categorys2_rubt_1.pt"))
+pig.load_state_dict(torch.load("C:/Cache/PJF-30/categorys2_pig_1.pt"))
+lego.load_state_dict(torch.load("C:/Cache/PJF-30/categorys2_lego_1.pt"))
+can.load_state_dict(torch.load("C:/Cache/PJF-30/categorys2_can_1.pt"))
 rubt.to(device)
 pig.to(device)
 lego.to(device)
@@ -202,6 +198,8 @@ def create_intm(input_tensor):
         out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax] + rubt_out + pig_out + lego_out + can_out # v3
         # out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax]  # v2
         # out = rubt_out + pig_out + lego_out + can_out  # v1
+        print(out)
+        input()
         return out
 
 class FC3(nn.Module):

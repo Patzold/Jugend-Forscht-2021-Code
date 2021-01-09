@@ -32,7 +32,7 @@ yes = [8, 9, 10, 11, 12, 13]
 train = []
 test = []
 
-if True:
+if False:
     out_train = []
     out_test = []
     for indx, dir in tqdm(enumerate(nos)):

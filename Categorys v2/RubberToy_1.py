@@ -26,7 +26,7 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-nos = [4, 5, 6, 7] # Pig Head
+nos = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21] # Pig Head
 yes = [1, 2, 3]
 
 train = []
@@ -72,16 +72,16 @@ if True:
     print(len(train), len(test))
 
     # train = np.array(train)
-    pickle_out = open((save_dir + "categorys2_rubt_1.pickle"),"wb")
+    pickle_out = open((save_dir + "categorys2_rubt_2.pickle"),"wb")
     pickle.dump(train, pickle_out)
     pickle_out.close()
-    pickle_out = open((save_dir + "categorys2_rubt_1t.pickle"),"wb")
+    pickle_out = open((save_dir + "categorys2_rubt_2t.pickle"),"wb")
     pickle.dump(test, pickle_out)
     pickle_out.close()
 else:
-    pickle_in = open(save_dir + "categorys2_rubt_1.pickle","rb")
+    pickle_in = open(save_dir + "categorys2_rubt_2.pickle","rb")
     train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "categorys2_rubt_1t.pickle","rb")
+    pickle_in = open(save_dir + "categorys2_rubt_2t.pickle","rb")
     test = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)

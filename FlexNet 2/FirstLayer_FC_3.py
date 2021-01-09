@@ -39,13 +39,17 @@ random.shuffle(train)
 random.shuffle(test)
 
 X, y, Xt, yt = [],  [], [],  []
-
+active = [0, 0, 0, 0, 0]
 for features, lables in train:
     X.append(features)
     y.append(lables)
 for features, lables in test:
     Xt.append(features)
     yt.append(lables)
+for i in range(len(Xt)):
+    num = Xt[i][:4].count(1)
+    active[num] += 1
+print(active)
 temp = np.array(y)
 print(np.max(temp))
 X = np.array(X, dtype=np.float32)
@@ -53,12 +57,6 @@ y = np.array(y, dtype=np.int64)
 Xt = np.array(Xt, dtype=np.float32)
 yt = np.array(yt, dtype=np.int64)
 print(np.max(X[0]), np.max(Xt[0]))
-
-# for i in range(0, len(X), 100):
-#     print(X[i].tolist().count(1), X[i], y[i])
-#     input()
-
-# quit()
 
 X = torch.from_numpy(X)
 y = torch.from_numpy(y)
@@ -97,9 +95,9 @@ else:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(12, 24)
-        self.fc2 = nn.Linear(24, 8)
-        self.fc3 = nn.Linear(8, 4)
+        self.fc1 = nn.Linear(12, 20)
+        self.fc2 = nn.Linear(20, 10)
+        self.fc3 = nn.Linear(10, 4)
     def forward(self, x):
         x = self.fc1(x)
         x = self.fc2(x)
@@ -126,7 +124,6 @@ train_data = []
 log = []
 valid_loss_min = np.Inf # track change in validation loss
 valid_acc_min = 0
-check = [0, 0, 0, 0]
 
 def evaluate():
     net.eval()
@@ -137,8 +134,6 @@ def evaluate():
             real_class = eval_y[i].to(device)
             net_out = net(eval_X[i].view(-1, 12).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
-            # print(real_class, net_out, predicted_class)
-            # input()
             if predicted_class == real_class:
                 correct += 1
             # else: cv2.imwrite(("D:/Datasets\stupid/test/o" + str(i) + ".jpg"), eval_X[i].view(75, 75, 1).numpy())
@@ -148,18 +143,24 @@ def evaluate():
     total = 0
     # Xta = Xt[:1500]
     # yta = yt[:1500]
+    totl = 0
+    check = [0, 0, 0, 0]
+    tcheck = [0, 0, 0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
             real_class = yt[i].to(device)
             net_out = net(Xt[i].view(-1, 12).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
+            totl += 1
+            tcheck[predicted_class.cpu().numpy()] += 1
             if predicted_class == real_class:
                 correct += 1
                 check[predicted_class.cpu().numpy()] += 1
             # else: cv2.imwrite(("D:/Datasets\stupid/test/i" + str(i) + ".jpg"), Xt[i].view(60, 60, 1).numpy())
             total += 1
     out_of_sample_acc = round(correct/total, 3)
-    print(check)
+    print(check, totl)
+    print(tcheck)
     return in_sample_acc, out_of_sample_acc
 
 t0 = time.time()
