@@ -36,40 +36,60 @@ pickle_in = open(save_dir + "img_tensor.pickle","rb")
 train = pickle.load(pickle_in)
 pickle_in = open(save_dir + "img_tensor_test.pickle","rb")
 test = pickle.load(pickle_in)
-i, y = train
-it, yt = test
+img, y = train
+imgt, yt = test
 
 print("X:", type(X), len(X), X[0])
 print("Xt:", type(Xt), len(Xt), Xt[0])
 print("y:", type(y), len(y), y[0])
 print("yt:", type(yt), len(yt), yt[0])
 
-to_shuffle_train = [[X[i], y[i]] for i in range(len(y))]
-to_shuffle_test = [[Xt[i], yt[i]] for i in range(len(yt))]
+to_shuffle_train = [[X[i], y[i], img[i]] for i in range(len(y))]
+to_shuffle_test = [[Xt[i], yt[i], imgt[i]] for i in range(len(yt))]
 
 random.shuffle(to_shuffle_train)
 random.shuffle(to_shuffle_test)
 
-print(len(to_shuffle_train), len(to_shuffle_train[0]), to_shuffle_train[0])
+print(len(to_shuffle_train), len(to_shuffle_train[0]), to_shuffle_train[0][:1])
 
-X, y, Xt, yt = [],  [], [],  []
-
-for features, lables in to_shuffle_train:
-    X.append(features)
-    y_append = lables
-    if lables.numpy() > 2: y_append = torch.from_numpy(np.array(1))
-    else: y_append = torch.from_numpy(np.array(0))
+X, y, img, imgt, Xt, yt = [],  [], [], [], [], []
+cat_counter = [0, 0, 0, 0]
+check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+for features, lables, images in to_shuffle_train:
+    a_lable = lables.numpy()
+    y_append = torch.from_numpy(np.array(0))
+    check[int(a_lable)] += 1
+    if a_lable > 2 and a_lable < 7:
+        y_append = torch.from_numpy(np.array(1))
+        if cat_counter[1] > 6000: continue
+        cat_counter[1] += 1
+    if a_lable > 6 and a_lable < 13:
+        y_append = torch.from_numpy(np.array(2))
+        if cat_counter[2] > 6000: continue
+        cat_counter[2] += 1
+    if a_lable > 12:
+        y_append = torch.from_numpy(np.array(3))
+        if cat_counter[3] > 6000: continue
+        cat_counter[3] += 1
     y.append(y_append)
+    X.append(features)
+    img.append(images)
+print(check)
+print(cat_counter)
 
-for features, lables in to_shuffle_test:
+check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+for features, lables, images in to_shuffle_test:
     Xt.append(features)
-    y_append = lables
+    imgt.append(images)
+    y_append = torch.from_numpy(np.array(0))
+    check[int(lables.numpy())] += 1
     if lables.numpy() > 2: y_append = torch.from_numpy(np.array(1))
-    else: y_append = torch.from_numpy(np.array(0))
+    if lables.numpy() > 6: y_append = torch.from_numpy(np.array(2))
+    if lables.numpy() > 12: y_append = torch.from_numpy(np.array(3))
     yt.append(y_append)
-
-print(X[:3], y[:3])
-print(Xt[:3], yt[:3])
+print(check)
+# print(X[:3], y[:3])
+# print(Xt[:3], yt[:3])
 
 print("X:", type(X), len(X), X[0])
 print("Xt:", type(Xt), len(Xt), Xt[0])
@@ -104,14 +124,14 @@ else:
     print('CUDA is available!  Training on GPU ...')
 
 # THE NETWORK
-classes = 2
+classes = 4
 
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear((classes + classes*2), 24)
-        self.fc2 = nn.Linear(24, 8)
-        self.fc3 = nn.Linear(8, classes)
+        self.fc1 = nn.Linear((classes + classes*2), 50)
+        self.fc2 = nn.Linear(50, 10)
+        self.fc3 = nn.Linear(10, classes)
     def forward(self, x):
         x = self.fc1(x)
         x = self.fc2(x)
@@ -122,7 +142,7 @@ net = Net()
 net.to(device)
 print(net)
 
-optimizer = optim.Adam(net.parameters(), lr=0.0001)
+optimizer = optim.Adam(net.parameters(), lr=0.0005)
 loss_function = nn.CrossEntropyLoss()
 
 BATCH_SIZE = 100
@@ -155,17 +175,19 @@ def evaluate():
     correct = 0
     total = 0
     check = [0, 0, 0, 0]
+    tcheck = [0, 0, 0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
             real_class = yt[i].to(device)
             net_out = net(Xt[i].view(-1, (classes + classes*2)).to(device))[0]
             predicted_class = torch.argmax(net_out)
+            tcheck[predicted_class.cpu().numpy()] += 1
             if predicted_class == real_class:
                 correct += 1
                 check[predicted_class.cpu().numpy()] += 1
             total += 1
     out_of_sample_acc = round(correct/total, 3)
-    print(check)
+    print(tcheck, check)
     return in_sample_acc, out_of_sample_acc
 
 t0 = time.time()
@@ -191,10 +213,29 @@ for epoch in range(EPOCHS):
     print("In-sample accuracy: ", isample, "  Out-of-sample accuracy: ", osample)
     train_data.append([isample, osample])
     log.append([isample, osample, loss, dtm])
-    if osample > valid_acc_min and epoch > 10:
+    if osample > valid_acc_min and epoch > 90:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
         torch.save(net.state_dict(), "C:/Cache/PJF-30/intm.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
+        out_train = []
+        for i in tqdm(range(len(X))):
+            real_class = y[i].to(device)
+            net_out = net(X[i].view(-1, (classes + classes*2)).to(device))[0]
+            predicted_class = torch.argmax(net_out)
+            out_train.append([img[i], predicted_class, y[i]])
+        pickle_out = open((save_dir + "last_layer_inpt.pickle"),"wb")
+        pickle.dump(out_train, pickle_out)
+        pickle_out.close()
+        out_test = []
+        for i in tqdm(range(len(Xt))):
+            real_class = yt[i].to(device)
+            net_out = net(Xt[i].view(-1, (classes + classes*2)).to(device))[0]
+            predicted_class = torch.argmax(net_out)
+            out_train.append([imgt[i], predicted_class, y[i]])
+        pickle_out = open((save_dir + "last_layer_inpt_t.pickle"),"wb")
+        pickle.dump(out_test, pickle_out)
+        pickle_out.close()
+print(valid_acc_min)
 t1 = time.time()
 time_spend = t1-t0
 
@@ -214,4 +255,4 @@ plt.ylim([0, 1])
 plt.savefig(("intm.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# Max Out of Sample Accuracy: 0.783    5min 3s         12 - 24 - 8 - 4        <-- Selected
+# Max Out of Sample Accuracy: 0.915    7min 41s         12 - 24 - 8 - 4        <-- Selected

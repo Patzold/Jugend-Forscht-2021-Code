@@ -24,17 +24,6 @@ torch.cuda.manual_seed_all(seed)
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
 
-base_dir = "C:/Datasets/PJF-30/data/"
-save_dir = "C:/Datasets/PJF-30/safe/"
-
-pickle_in = open(save_dir + "img_tensor.pickle","rb")
-train = pickle.load(pickle_in)
-pickle_in = open(save_dir + "img_tensor_test.pickle","rb")
-test = pickle.load(pickle_in)
-
-X, y = train
-Xt, yt = test
-
 train_on_gpu = torch.cuda.is_available()
 if not train_on_gpu:
     device = torch.device("cpu")
@@ -43,20 +32,20 @@ else:
     device = torch.device("cuda:0")
     print('CUDA is available!  Training on GPU ...')
 
-class RubberToy(nn.Module):
+class RubberToys(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 32, 2)
-        self.conv2 = nn.Conv2d(32, 64, 2)
-        self.dropout = nn.Dropout(0.75)
+        self.conv1 = nn.Conv2d(3, 12, 2)
+        self.conv2 = nn.Conv2d(12, 24, 2)
+        self.dropout = nn.Dropout(0.5)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
         self.convs(x)
 
-        self.fc1 = nn.Linear(self._to_linear, 300) #flattening.
-        self.fc2 = nn.Linear(300, 100)
-        self.fc3 = nn.Linear(100, 2)
+        self.fc1 = nn.Linear(self._to_linear, 200) #flattening.
+        self.fc2 = nn.Linear(200, 100)
+        self.fc3 = nn.Linear(100, 3)
 
     def convs(self, x):
             c1 = self.conv1(x)
@@ -68,7 +57,7 @@ class RubberToy(nn.Module):
             
             if self._to_linear is None:
                 self._to_linear = pool2[0].shape[0]*pool2[0].shape[1]*pool2[0].shape[2]
-                print("to linear: ", self._to_linear)
+                print("Classes: RubberToys loaded")
             return pool2
 
     def forward(self, x):
@@ -79,20 +68,20 @@ class RubberToy(nn.Module):
         x = self.fc3(x)
         return x
 
-class PigHead(nn.Module):
+class Pigs(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 32, 2)
-        self.conv2 = nn.Conv2d(32, 64, 2)
-        self.dropout = nn.Dropout(0.75)
+        self.conv1 = nn.Conv2d(3, 12, 2)
+        self.conv2 = nn.Conv2d(12, 24, 2)
+        self.dropout = nn.Dropout(0.3)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
         self.convs(x)
 
-        self.fc1 = nn.Linear(self._to_linear, 300) #flattening.
-        self.fc2 = nn.Linear(300, 100)
-        self.fc3 = nn.Linear(100, 2)
+        self.fc1 = nn.Linear(self._to_linear, 200) #flattening.
+        self.fc2 = nn.Linear(200, 100)
+        self.fc3 = nn.Linear(100, 4)
 
     def convs(self, x):
             c1 = self.conv1(x)
@@ -104,7 +93,7 @@ class PigHead(nn.Module):
             
             if self._to_linear is None:
                 self._to_linear = pool2[0].shape[0]*pool2[0].shape[1]*pool2[0].shape[2]
-                print("to linear: ", self._to_linear)
+                print("Classes: Pigs loaded")
             return pool2
 
     def forward(self, x):
@@ -115,20 +104,20 @@ class PigHead(nn.Module):
         x = self.fc3(x)
         return x
 
-class Lego(nn.Module):
+class Legos(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 32, 2)
-        self.conv2 = nn.Conv2d(32, 64, 2)
-        self.dropout = nn.Dropout(0.75)
+        self.conv1 = nn.Conv2d(3, 12, 2)
+        self.conv2 = nn.Conv2d(12, 24, 2)
+        self.dropout = nn.Dropout(0.5)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
         self.convs(x)
 
-        self.fc1 = nn.Linear(self._to_linear, 300) #flattening.
-        self.fc2 = nn.Linear(300, 100)
-        self.fc3 = nn.Linear(100, 2)
+        self.fc1 = nn.Linear(self._to_linear, 200) #flattening.
+        self.fc2 = nn.Linear(200, 100)
+        self.fc3 = nn.Linear(100, 6)
 
     def convs(self, x):
             c1 = self.conv1(x)
@@ -140,7 +129,7 @@ class Lego(nn.Module):
             
             if self._to_linear is None:
                 self._to_linear = pool2[0].shape[0]*pool2[0].shape[1]*pool2[0].shape[2]
-                print("to linear: ", self._to_linear)
+                print("Classes: Legos loaded")
             return pool2
 
     def forward(self, x):
@@ -151,12 +140,12 @@ class Lego(nn.Module):
         x = self.fc3(x)
         return x
 
-class Can(nn.Module):
+class Cans(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 32, 2)
-        self.conv2 = nn.Conv2d(32, 64, 2)
-        self.dropout = nn.Dropout(0.75)
+        self.conv1 = nn.Conv2d(3, 50, 2)
+        self.conv2 = nn.Conv2d(50, 100, 2)
+        self.dropout = nn.Dropout(0.7)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
@@ -164,20 +153,20 @@ class Can(nn.Module):
 
         self.fc1 = nn.Linear(self._to_linear, 500) #flattening.
         self.fc2 = nn.Linear(500, 100)
-        self.fc3 = nn.Linear(100, 2)
+        self.fc3 = nn.Linear(100, 4)
 
     def convs(self, x):
-            x = self.conv1(x)
-            x = F.relu(x)
-            x = F.max_pool2d(x, (2, 2))
-            x = self.conv2(x)
-            x = F.relu(x)
-            x = F.max_pool2d(x, (2, 2))
+            c1 = self.conv1(x)
+            relu1 = F.relu(c1)
+            pool1 = F.max_pool2d(relu1, (2, 2))
+            c2 = self.conv2(pool1)
+            relu2 = F.relu(c2)
+            pool2 = F.max_pool2d(relu2, (2, 2))
             
             if self._to_linear is None:
-                self._to_linear = x[0].shape[0]*x[0].shape[1]*x[0].shape[2]
-                print("to linear: ", self._to_linear)
-            return x
+                self._to_linear = pool2[0].shape[0]*pool2[0].shape[1]*pool2[0].shape[2]
+                print("Classes: Cans loaded")
+            return pool2
 
     def forward(self, x):
         x = self.convs(x)
@@ -187,59 +176,16 @@ class Can(nn.Module):
         x = self.fc3(x)
         return x
 
-rubt, pig, lego, can = RubberToy(), PigHead(), Lego(), Can()
-rubt.load_state_dict(torch.load("C:/Cache/PJF-30/categorys2_rubt_1.pt"))
-pig.load_state_dict(torch.load("C:/Cache/PJF-30/categorys2_pig_1.pt"))
-lego.load_state_dict(torch.load("C:/Cache/PJF-30/categorys2_lego_1.pt"))
-can.load_state_dict(torch.load("C:/Cache/PJF-30/categorys2_can_1.pt"))
-rubt.to(device)
-pig.to(device)
-lego.to(device)
-can.to(device)
-rubt.eval()
-pig.eval()
-lego.eval()
-can.eval()
-
-# v1: raw net output
-# v2: argmax
-# v3: raw output & argmax
-
-def run(input_tensor):
-    with torch.no_grad():
-        rubt_out = rubt(input_tensor).cpu().numpy().tolist()[0]
-        rubt_argmax = torch.argmax(rubt(input_tensor)).cpu().numpy().tolist()
-        pig_out = pig(input_tensor).cpu().numpy().tolist()[0]
-        pig_argmax = torch.argmax(pig(input_tensor).cpu()).numpy().tolist()
-        lego_out = lego(input_tensor).cpu().numpy().tolist()[0]
-        lego_argmax = torch.argmax(lego(input_tensor).cpu()).numpy().tolist()
-        can_out = can(input_tensor).cpu().numpy().tolist()[0]
-        can_argmax = torch.argmax(can(input_tensor).cpu()).numpy().tolist()
-        out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax] + rubt_out + pig_out + lego_out + can_out
-        # out = [rubt_argmax, pig_argmax]  # v2
-        # out = rubt_out + pig_out  # v1
-        return out
-
-intm = []
-for i in tqdm(range(len(y))):
-    result = run(X[i].view(-1, 3, 224, 224).to(device))
-    intm.append(result)
-pickle_out = open((save_dir + "intm.pickle"),"wb")
-pickle.dump(intm, pickle_out)
-pickle_out.close()
-
-intm = []
-for i in tqdm(range(len(yt))):
-    result = run(Xt[i].view(-1, 3, 224, 224).to(device))
-    intm.append(result)
-pickle_out = open((save_dir + "intm_t.pickle"),"wb")
-pickle.dump(intm, pickle_out)
-pickle_out.close()
-
-# All 17
-# Train part: 2m 57s
-# Test part: 44s
-
-# Baseline
-# Train part: 1m 9s
-# Test part: 16s
+rubberts, pigs, legos, cans = RubberToys(), Pigs(), Legos(), Cans()
+rubberts.load_state_dict(torch.load("C:/Cache/PJF-30/classes_rubt_1_1.pt"))
+pigs.load_state_dict(torch.load("C:/Cache/PJF-30/classes_pig_1.pt"))
+legos.load_state_dict(torch.load("C:/Cache/PJF-30/classes_lego_1.pt"))
+cans.load_state_dict(torch.load("C:/Cache/PJF-30/classes_can_1.pt"))
+rubberts.to(device)
+pigs.to(device)
+legos.to(device)
+cans.to(device)
+rubberts.eval()
+pigs.eval()
+legos.eval()
+cans.eval()
