@@ -194,16 +194,16 @@ class Can(nn.Module):
 rubt, pig, lego, can = RubberToy(), PigHead(), Lego(), Can()
 rubt.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_rubt_1_1.pt"))
 pig.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_pig_1.pt"))
-lego.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_lego_2.pt"))
-can.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_can_1.pt"))
+# lego.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_lego_2.pt"))
+# can.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_can_1.pt"))
 rubt.to(device)
 pig.to(device)
-lego.to(device)
-can.to(device)
+# lego.to(device)
+# can.to(device)
 rubt.eval()
 pig.eval()
-lego.eval()
-can.eval()
+# lego.eval()
+# can.eval()
 
 # v1: raw net output
 # v2: argmax
@@ -236,5 +236,10 @@ pickle_out = open((save_dir + "intm_t.pickle"),"wb")
 pickle.dump(intm, pickle_out)
 pickle_out.close()
 
+# All 17
 # Train part: 2m 57s
 # Test part: 44s
+
+# Baseline
+# Train part: 1m 9s
+# Test part: 16s

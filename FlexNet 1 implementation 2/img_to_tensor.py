@@ -26,7 +26,7 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-dirct = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21]
+dirct = [1, 2, 3, 4, 5, 6, 7]#, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21]
 
 X, y, Xt, yt = [],  [], [],  []
 

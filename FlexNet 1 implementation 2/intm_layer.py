@@ -39,22 +39,59 @@ test = pickle.load(pickle_in)
 i, y = train
 it, yt = test
 
-X = torch.Tensor(X)
-Xt = torch.Tensor(Xt)
-X.to(torch.float32)
-Xt.to(torch.int64)
-print(X.dtype)
-print(y[10:], yt[:10])
-print(X[10:], Xt[:10])
+print("X:", type(X), len(X), X[0])
+print("Xt:", type(Xt), len(Xt), Xt[0])
+print("y:", type(y), len(y), y[0])
+print("yt:", type(yt), len(yt), yt[0])
+
+to_shuffle_train = [[X[i], y[i]] for i in range(len(y))]
+to_shuffle_test = [[Xt[i], yt[i]] for i in range(len(yt))]
+
+random.shuffle(to_shuffle_train)
+random.shuffle(to_shuffle_test)
+
+print(len(to_shuffle_train), len(to_shuffle_train[0]), to_shuffle_train[0])
+
+X, y, Xt, yt = [],  [], [],  []
+
+for features, lables in to_shuffle_train:
+    X.append(features)
+    y_append = lables
+    if lables.numpy() > 2: y_append = torch.from_numpy(np.array(1))
+    else: y_append = torch.from_numpy(np.array(0))
+    y.append(y_append)
+
+for features, lables in to_shuffle_test:
+    Xt.append(features)
+    y_append = lables
+    if lables.numpy() > 2: y_append = torch.from_numpy(np.array(1))
+    else: y_append = torch.from_numpy(np.array(0))
+    yt.append(y_append)
+
+print(X[:3], y[:3])
+print(Xt[:3], yt[:3])
+
+print("X:", type(X), len(X), X[0])
+print("Xt:", type(Xt), len(Xt), Xt[0])
+print("y:", type(y), len(y), y[0])
+print("yt:", type(yt), len(yt), yt[0])
+
+print(y[0].numpy())
+print(int(y[0].numpy()))
 
 check = [0, 0, 0, 0]
-for i in range(l):
-        check[y[i].numpy()] += 1
+for i in range(len(y)):
+    check[int(y[i].numpy())] += 1
 print(check)
 check = [0, 0, 0, 0]
-for i in range(lt):
-        check[yt[i].numpy()] += 1
+for i in range(len(yt)):
+    check[yt[i].numpy()] += 1
 print(check)
+
+X = torch.from_numpy(np.array(X)).to(torch.float32)
+Xt = torch.from_numpy(np.array(Xt)).to(torch.float32)
+y = torch.from_numpy(np.array(y)).to(torch.int64)
+yt = torch.from_numpy(np.array(yt)).to(torch.int64)
 
 train_on_gpu = torch.cuda.is_available()
 theCPU = torch.device("cpu")
@@ -67,13 +104,14 @@ else:
     print('CUDA is available!  Training on GPU ...')
 
 # THE NETWORK
+classes = 2
 
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(12, 24)
+        self.fc1 = nn.Linear((classes + classes*2), 24)
         self.fc2 = nn.Linear(24, 8)
-        self.fc3 = nn.Linear(8, 4)
+        self.fc3 = nn.Linear(8, classes)
     def forward(self, x):
         x = self.fc1(x)
         x = self.fc2(x)
@@ -94,11 +132,11 @@ train_log = []
 eval_size = int(len(X)*0.1)
 eval_X = X[:eval_size]
 eval_y = y[:eval_size]
-print("After eval split: ", X.shape, y.shape)
+print("After eval split: ", len(X), len(y))
 
 train_data = []
 log = []
-valid_loss_min = np.Inf # track change in validation loss
+valid_loss_min = np.Inf
 valid_acc_min = 0
 
 def evaluate():
@@ -108,29 +146,23 @@ def evaluate():
     with torch.no_grad():
         for i in tqdm(range(len(eval_X))):
             real_class = eval_y[i].to(device)
-            net_out = net(eval_X[i].view(-1, 12).to(device))[0]  # returns a list
+            net_out = net(eval_X[i].view(-1, (classes + classes*2)).to(device))[0]
             predicted_class = torch.argmax(net_out)
-            # print(real_class, net_out, predicted_class)
-            # input()
             if predicted_class == real_class:
                 correct += 1
-            # else: cv2.imwrite(("D:/Datasets\stupid/test/o" + str(i) + ".jpg"), eval_X[i].view(75, 75, 1).numpy())
             total += 1
     in_sample_acc = round(correct/total, 3)
     correct = 0
     total = 0
-    # Xta = Xt[:1500]
-    # yta = yt[:1500]
     check = [0, 0, 0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
             real_class = yt[i].to(device)
-            net_out = net(Xt[i].view(-1, 12).to(device))[0]  # returns a list
+            net_out = net(Xt[i].view(-1, (classes + classes*2)).to(device))[0]
             predicted_class = torch.argmax(net_out)
             if predicted_class == real_class:
                 correct += 1
                 check[predicted_class.cpu().numpy()] += 1
-            # else: cv2.imwrite(("D:/Datasets\stupid/test/i" + str(i) + ".jpg"), Xt[i].view(60, 60, 1).numpy())
             total += 1
     out_of_sample_acc = round(correct/total, 3)
     print(check)
@@ -139,9 +171,8 @@ def evaluate():
 t0 = time.time()
 for epoch in range(EPOCHS):
     dtm = str(datetime.datetime.now())
-    for i in tqdm(range(0, len(X), BATCH_SIZE)): # from 0, to the len of x, stepping BATCH_SIZE at a time. [:50] ..for now just to dev
+    for i in tqdm(range(0, len(X), BATCH_SIZE)):
         net.train()
-        # try:
         batch_X = X[i:i+BATCH_SIZE]
         batch_y = y[i:i+BATCH_SIZE]
         batch_X, batch_y = batch_X.to(device), batch_y.to(device)
@@ -150,12 +181,10 @@ for epoch in range(EPOCHS):
         # Actual training
         net.zero_grad()
         optimizer.zero_grad()
-        outputs = net(batch_X.view(-1, 12))
-        # print(batch_X, batch_y, outputs)
-        # input()
+        outputs = net(batch_X.view(-1, (classes + classes*2)))
         loss = loss_function(outputs, batch_y)
         loss.backward()
-        optimizer.step() # Does the update
+        optimizer.step()
 
     print(f"Epoch: {epoch}. Loss: {loss}")
     isample, osample = evaluate()
@@ -185,8 +214,4 @@ plt.ylim([0, 1])
 plt.savefig(("intm.pdf")) #                                              <-- UPDATE
 plt.show()
 
- # Max Out of Sample Accuracy: 0.914    3min 12s         9 - 192 - 64 - 3
-# Max Out of Sample Accuracy: 0.782    5min 14s         12 - 96 - 32 - 4
-# Max Out of Sample Accuracy: 0.782    5min 7s         12 - 48 - 16 - 4
 # Max Out of Sample Accuracy: 0.783    5min 3s         12 - 24 - 8 - 4        <-- Selected
- # Max Out of Sample Accuracy: 0.869    4min 50s         9 - 12 - 4 - 3
