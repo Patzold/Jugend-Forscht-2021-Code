@@ -204,26 +204,37 @@ can.eval()
 # v1: raw net output
 # v2: argmax
 # v3: raw output & argmax
-
+check_integers = [0, 0, 0, 0]
 def run(input_tensor):
     with torch.no_grad():
         rubt_out = rubt(input_tensor).cpu().numpy().tolist()[0]
         rubt_argmax = torch.argmax(rubt(input_tensor)).cpu().numpy().tolist()
+        if rubt_argmax == 1: check_integers[0] += 1
         pig_out = pig(input_tensor).cpu().numpy().tolist()[0]
         pig_argmax = torch.argmax(pig(input_tensor).cpu()).numpy().tolist()
+        if pig_argmax == 1: check_integers[1] += 1
         lego_out = lego(input_tensor).cpu().numpy().tolist()[0]
         lego_argmax = torch.argmax(lego(input_tensor).cpu()).numpy().tolist()
+        if lego_argmax == 1: check_integers[2] += 1
         can_out = can(input_tensor).cpu().numpy().tolist()[0]
         can_argmax = torch.argmax(can(input_tensor).cpu()).numpy().tolist()
+        if can_argmax == 1: check_integers[3] += 1
         out = [rubt_argmax, pig_argmax, lego_argmax, can_argmax] + rubt_out + pig_out + lego_out + can_out
         # out = [rubt_argmax, pig_argmax]  # v2
         # out = rubt_out + pig_out  # v1
         return out
 
 intm = []
+analytics = [0, 0, 0, 0, 0]
 for i in tqdm(range(len(y))):
     result = run(X[i].view(-1, 3, 224, 224).to(device))
+    integers = result[:4]
+    count = integers.count(1)
+    analytics[count] += 1
     intm.append(result)
+print("Analytics: ", analytics)
+print("Check integers: ", check_integers)
+quit()
 pickle_out = open((save_dir + "intm.pickle"),"wb")
 pickle.dump(intm, pickle_out)
 pickle_out.close()
