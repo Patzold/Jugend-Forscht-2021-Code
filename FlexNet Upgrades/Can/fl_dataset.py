@@ -85,14 +85,16 @@ else:
     device = torch.device("cuda:0")
     print('CUDA is available!  Training on GPU ...')
 
-X, y, Xt, yt = [],  [], [],  []
+X, y, Xt, yt, c, ct = [],  [], [], [], [], []
 
 for features, lables, subcat in train:
     X.append(features)
     y.append(lables)
+    c.append(subcat)
 for features, lables, subcat in test:
     Xt.append(features)
     yt.append(lables)
+    ct.append(subcat)
 temp = np.array(y)
 print(np.max(temp))
 X = np.array(X, dtype=np.float32) / 255
@@ -125,12 +127,20 @@ print(check)
 print(fl.run(X[0].view(-1, 3, 224, 224).to(device)))
 
 intm = []
+img_in_order = []
 
 for i in tqdm(range(len(y))):
     result = fl.run(X[i].view(-1, 3, 224, 224).to(device))
     intm.append([result, y[i].cpu().numpy().tolist()])
+    img_in_order.append([X[i].cpu().numpy(), y[i].cpu().numpy().tolist(), c[i]])
 
-pickle_out = open((save_dir + "can_intm_3_raw.pickle"),"wb")
+pickle_out = open((save_dir + "can_intm_3_img.pickle"),"wb")
+pickle.dump(img_in_order, pickle_out)
+pickle_out.close()
+
+print(np.array(img_in_order).shape)
+
+pickle_out = open((save_dir + "can_intm_3_raw2.pickle"),"wb")
 pickle.dump(intm, pickle_out)
 pickle_out.close()
 

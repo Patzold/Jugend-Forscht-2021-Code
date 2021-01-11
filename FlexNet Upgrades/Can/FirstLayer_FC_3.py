@@ -27,9 +27,9 @@ torch.backends.cudnn.deterministic = True
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
 
-pickle_in = open(save_dir + "can_intm_3_raw.pickle","rb")
+pickle_in = open(save_dir + "can_intm_3_raw2.pickle","rb")
 train = pickle.load(pickle_in)
-pickle_in = open(save_dir + "can_intm_3t_raw.pickle","rb")
+pickle_in = open(save_dir + "can_intm_3t_raw2.pickle","rb")
 test = pickle.load(pickle_in)
 
 l = len(train)
@@ -190,7 +190,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/can_intm_3.pt") #                                                  <-- UPDATE
+        # torch.save(net.state_dict(), "C:/Cache/PJF-30/can_intm_3.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -208,7 +208,7 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("intm_3.pdf")) #                                              <-- UPDATE
+# plt.savefig(("intm_3.pdf")) #                                              <-- UPDATE
 plt.show()
 
  # Max Out of Sample Accuracy: 0.914    3min 12s         9 - 192 - 64 - 3
