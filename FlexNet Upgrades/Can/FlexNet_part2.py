@@ -45,15 +45,28 @@ print(len(out_train), len(out_test))
 print(len(out_train[0]), len(out_test[0]))
 print(out_train[0], out_test[0])
 
-predicted_category, images, real_category, real_class = out_train
-predicted_categoryt, imagest, real_categoryt, real_classt = out_test
+predicted_category, images, real_category, real_class, predicted_categoryt, imagest, real_categoryt, real_classt = [], [], [], [], [], [], [], []
+
+for pc, i, rct, rcl in out_train:
+    predicted_category.append(pc)
+    images.append(i)
+    real_category.append(rct)
+    real_class.append(rcl)
+for pc, i, rct, rcl in out_test:
+    predicted_categoryt.append(pc)
+    imagest.append(i)
+    real_categoryt.append(rct)
+    real_classt.append(rcl)
 
 print(len(predicted_category), len(images), len(real_category), len(real_class))
-
+correct = 0
+total = 0
 for i in range(len(predicted_category)):
-    print(predicted_category[i], real_category[i], real_class[i])
-    cv2.imshow("img", images[i])
-    cv2.waitKey(0)
+    total += 1
+    if predicted_category[i] == real_category[i]:
+        correct += 1
+
+print(total, correct, round(correct/total, 3))
 
 class RubberToys(nn.Module):
     def __init__(self):
@@ -221,31 +234,29 @@ cans.eval()
 
 correct = 0
 cat_correct = 0
-test_cat_correct = 0
 total = 0
 with torch.no_grad():
-    for i in tqdm(range(len(out_test))):
+    for i in tqdm(range(len(predicted_category))):
         total += 1
-        predicted_category = out_test[i].cpu().numpy().tolist()
-        correct_category = img_in_ordert[i][1]
-        correct_class = img_in_ordert[i][2]
-        if predicted_category == correct_category: test_cat_correct += 1
-        input_tensor = torch.from_numpy(img_in_order[i][0]).to(device).to(torch.float32).view(-1, 3, 224, 224)
-        if predicted_category == 0:
-            if predicted_category == correct_category: cat_correct += 1
+        pc = predicted_category[i].cpu().numpy().tolist()
+        correct_category = real_category[i]
+        correct_class = real_class[i]
+        input_tensor = torch.from_numpy(images[i]).to(device).to(torch.float32).view(-1, 3, 224, 224)
+        if pc == 0:
+            if pc == correct_category: cat_correct += 1
             predicted_class = torch.argmax(rubberts(input_tensor)).cpu().numpy().tolist() + 1
-        elif predicted_category == 1:
-            if predicted_category == correct_category: cat_correct += 1
+        elif pc == 1:
+            if pc == correct_category: cat_correct += 1
             predicted_class = torch.argmax(pigs(input_tensor)).cpu().numpy().tolist() + 4
-        elif predicted_category == 2:
-            if predicted_category == correct_category: cat_correct += 1
+        elif pc == 2:
+            if pc == correct_category: cat_correct += 1
             predicted_class = torch.argmax(legos(input_tensor)).cpu().numpy().tolist() + 8
-        elif predicted_category == 3:
-            if predicted_category == correct_category: cat_correct += 1
+        elif pc == 3:
+            if pc == correct_category: cat_correct += 1
             predicted_class = torch.argmax(cans(input_tensor)).cpu().numpy().tolist() + 14
         else:
             raise Exception("A serious problem just occoured.")
         if predicted_class == correct_class: correct += 1
 
 print(total, correct, "  --> ", round(correct/total, 3))
-print(cat_correct, test_cat_correct)
+print(cat_correct)
