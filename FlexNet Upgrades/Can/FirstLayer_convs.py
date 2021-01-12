@@ -183,7 +183,7 @@ class Can(nn.Module):
 rubt, pig, lego, can = RubberToy(), PigHead(), Lego(), Can()
 rubt.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_rubt_1_1.pt"))
 pig.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_pig_1.pt"))
-lego.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_lego_2.pt"))
+lego.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_lego_1.pt"))
 can.load_state_dict(torch.load("C:/Cache/PJF-30/categorys_can_1.pt"))
 rubt.to(device)
 pig.to(device)

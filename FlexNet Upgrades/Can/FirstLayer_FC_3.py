@@ -162,6 +162,42 @@ def evaluate():
     print(check)
     return in_sample_acc, out_of_sample_acc
 
+def run():
+    net.eval()
+    correct = 0
+    total = 0
+    out_train = []
+    with torch.no_grad():
+        for i in tqdm(range(len(X))):
+            real_class = y[i].to(device)
+            net_out = net(X[i].view(-1, 12).to(device))[0]  # returns a list
+            predicted_class = torch.argmax(net_out)
+            out_train.append(predicted_class)
+            if predicted_class == real_class:
+                correct += 1
+            total += 1
+    in_sample_acc = round(correct/total, 3)
+    correct = 0
+    total = 0
+    check = [0, 0, 0, 0]
+    out_test = []
+    with torch.no_grad():
+        for i in tqdm(range(len(Xt))):
+            real_class = yt[i].to(device)
+            net_out = net(Xt[i].view(-1, 12).to(device))[0]  # returns a list
+            predicted_class = torch.argmax(net_out)
+            out_test.append(predicted_class)
+            if predicted_class == real_class:
+                correct += 1
+                check[predicted_class.cpu().numpy()] += 1
+            total += 1
+    out_of_sample_acc = round(correct/total, 3)
+    pickle_out = open((save_dir + "fc_out.pickle"),"wb")
+    pickle.dump([out_train, out_test], pickle_out)
+    pickle_out.close()
+    print(check)
+    print(in_sample_acc, out_of_sample_acc)
+
 t0 = time.time()
 for epoch in range(EPOCHS):
     dtm = str(datetime.datetime.now())
@@ -190,8 +226,9 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        # torch.save(net.state_dict(), "C:/Cache/PJF-30/can_intm_3.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/can_intm_3.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
+        run()
 t1 = time.time()
 time_spend = t1-t0
 
@@ -208,11 +245,8 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-# plt.savefig(("intm_3.pdf")) #                                              <-- UPDATE
+plt.savefig(("intm_3.pdf")) #                                              <-- UPDATE
 plt.show()
 
- # Max Out of Sample Accuracy: 0.914    3min 12s         9 - 192 - 64 - 3
-# Max Out of Sample Accuracy: 0.782    5min 14s         12 - 96 - 32 - 4
-# Max Out of Sample Accuracy: 0.782    5min 7s         12 - 48 - 16 - 4
-# Max Out of Sample Accuracy: 0.783    5min 3s         12 - 24 - 8 - 4        <-- Selected
- # Max Out of Sample Accuracy: 0.869    4min 50s         9 - 12 - 4 - 3
+# Max Out of Sample Accuracy: 0.782    5min 25s         12 - 96 - 32 - 4        <-- Selected
+# Max Out of Sample Accuracy: 0.782    6min 32s         12 - 24 - 8 - 4
