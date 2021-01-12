@@ -27,9 +27,9 @@ torch.backends.cudnn.deterministic = True
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
 
-pickle_in = open(save_dir + "can_intm_3_raw2.pickle","rb")
+pickle_in = open(save_dir + "can_intm_3_img.pickle","rb")
 train = pickle.load(pickle_in)
-pickle_in = open(save_dir + "can_intm_3t_raw2.pickle","rb")
+pickle_in = open(save_dir + "can_intm_3_img.pickle","rb")
 test = pickle.load(pickle_in)
 
 l = len(train)
@@ -38,14 +38,18 @@ print(len(train), len(test))
 random.shuffle(train)
 random.shuffle(test)
 
-X, y, Xt, yt = [],  [], [],  []
-
-for features, lables in train:
+X, y, Xt, yt, c, ct, im, imt = [], [], [], [], [], [], [], []
+# intm results, image, category, class
+for features, img, lables, theclass  in train:
     X.append(features)
     y.append(lables)
-for features, lables in test:
+    c.append(theclass)
+    im.append(img)
+for features, img, lables, theclass in test:
     Xt.append(features)
     yt.append(lables)
+    ct.append(theclass)
+    imt.append(img)
 temp = np.array(y)
 print(np.max(temp))
 X = np.array(X, dtype=np.float32)
@@ -172,7 +176,8 @@ def run():
             real_class = y[i].to(device)
             net_out = net(X[i].view(-1, 12).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
-            out_train.append(predicted_class)
+            out_train.append([predicted_class, im[i], y[i], c[i]])
+            # predicted cat, image, real cat, real class
             if predicted_class == real_class:
                 correct += 1
             total += 1
@@ -186,7 +191,7 @@ def run():
             real_class = yt[i].to(device)
             net_out = net(Xt[i].view(-1, 12).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
-            out_test.append(predicted_class)
+            out_test.append([predicted_class, im[i], y[i], c[i]])
             if predicted_class == real_class:
                 correct += 1
                 check[predicted_class.cpu().numpy()] += 1
@@ -249,4 +254,4 @@ plt.savefig(("intm_3.pdf")) #                                              <-- U
 plt.show()
 
 # Max Out of Sample Accuracy: 0.782    5min 25s         12 - 96 - 32 - 4        <-- Selected
-# Max Out of Sample Accuracy: 0.782    6min 32s         12 - 24 - 8 - 4
+# Max Out of Sample Accuracy: 0.908    21min 19s         12 - 24 - 8 - 4

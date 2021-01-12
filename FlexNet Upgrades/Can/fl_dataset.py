@@ -129,20 +129,20 @@ print(fl.run(X[0].view(-1, 3, 224, 224).to(device)))
 intm = []
 img_in_order = []
 
-for i in tqdm(range(len(yt))):
-    result = fl.run(Xt[i].view(-1, 3, 224, 224).to(device))
-    intm.append([result, yt[i].cpu().numpy().tolist()])
-    img_in_order.append([Xt[i].cpu().numpy(), yt[i].cpu().numpy().tolist(), ct[i]])
+for i in tqdm(range(len(y))):
+    result = fl.run(X[i].view(-1, 3, 224, 224).to(device))
+    img_in_order.append([result, X[i].cpu().numpy(), y[i].cpu().numpy().tolist(), c[i]])
+    # intm results, image, category, class
 
-pickle_out = open((save_dir + "can_intm_3t_img.pickle"),"wb")
+pickle_out = open((save_dir + "can_intm_3_img.pickle"),"wb")
 pickle.dump(img_in_order, pickle_out)
 pickle_out.close()
 
 print(np.array(img_in_order).shape)
 
-pickle_out = open((save_dir + "can_intm_3t_raw2.pickle"),"wb")
-pickle.dump(intm, pickle_out)
-pickle_out.close()
+# pickle_out = open((save_dir + "can_intm_3t_raw2.pickle"),"wb")
+# pickle.dump(intm, pickle_out)
+# pickle_out.close()
 
 # intm 1t  1m 5s
 # intm 2t  1m 5s
