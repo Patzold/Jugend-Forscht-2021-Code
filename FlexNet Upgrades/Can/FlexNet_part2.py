@@ -236,14 +236,17 @@ correct = 0
 cat_correct = 0
 total = 0
 with torch.no_grad():
-    for i in tqdm(range(len(predicted_category))):
+    for i in tqdm(range(len(predicted_categoryt))):
         total += 1
-        pc = predicted_category[i].cpu().numpy().tolist()
-        correct_category = real_category[i]
-        correct_class = real_class[i]
-        input_tensor = torch.from_numpy(images[i]).to(device).to(torch.float32).view(-1, 3, 224, 224)
+        pc = predicted_categoryt[i].cpu().numpy().tolist()
+        correct_category = real_categoryt[i]
+        correct_class = real_classt[i]
+        input_tensor = torch.from_numpy(imagest[i]).to(device).to(torch.float32).view(-1, 3, 224, 224)
         if pc == 0:
-            if pc == correct_category: cat_correct += 1
+            # if pc == correct_category: cat_correct += 1
+            # else:
+            #     print(pc, correct_category)
+            #     input()
             predicted_class = torch.argmax(rubberts(input_tensor)).cpu().numpy().tolist() + 1
         elif pc == 1:
             if pc == correct_category: cat_correct += 1

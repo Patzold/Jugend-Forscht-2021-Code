@@ -191,7 +191,7 @@ def run():
             real_class = yt[i].to(device)
             net_out = net(Xt[i].view(-1, 12).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
-            out_test.append([predicted_class, im[i], y[i], c[i]])
+            out_test.append([predicted_class, imt[i], yt[i], ct[i]])
             if predicted_class == real_class:
                 correct += 1
                 check[predicted_class.cpu().numpy()] += 1
@@ -229,7 +229,7 @@ for epoch in range(EPOCHS):
     print("In-sample accuracy: ", isample, "  Out-of-sample accuracy: ", osample)
     train_data.append([isample, osample])
     log.append([isample, osample, loss, dtm])
-    if osample > valid_acc_min and epoch > 10:
+    if osample > valid_acc_min and epoch > 90:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
         torch.save(net.state_dict(), "C:/Cache/PJF-30/can_intm_3.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
@@ -254,4 +254,4 @@ plt.savefig(("intm_3.pdf")) #                                              <-- U
 plt.show()
 
 # Max Out of Sample Accuracy: 0.782    5min 25s         12 - 96 - 32 - 4        <-- Selected
-# Max Out of Sample Accuracy: 0.908    21min 19s         12 - 24 - 8 - 4
+# Max Out of Sample Accuracy: 0.908    18min 23s         12 - 24 - 8 - 4
