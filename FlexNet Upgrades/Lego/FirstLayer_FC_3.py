@@ -1,5 +1,5 @@
 import os
-os.chdir("FlexNet Upgrades/Lego")
+os.chdir("FlexNet Upgrades/Can")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -27,9 +27,9 @@ torch.backends.cudnn.deterministic = True
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
 
-pickle_in = open(save_dir + "lego_intm_3_raw.pickle","rb")
+pickle_in = open(save_dir + "lego_intm_3_img.pickle","rb")
 train = pickle.load(pickle_in)
-pickle_in = open(save_dir + "lego_intm_3t_raw.pickle","rb")
+pickle_in = open(save_dir + "lego_intm_3t_img.pickle","rb")
 test = pickle.load(pickle_in)
 
 l = len(train)
@@ -38,14 +38,18 @@ print(len(train), len(test))
 random.shuffle(train)
 random.shuffle(test)
 
-X, y, Xt, yt = [],  [], [],  []
-
-for features, lables in train:
+X, y, Xt, yt, c, ct, im, imt = [], [], [], [], [], [], [], []
+# intm results, image, category, class
+for features, img, lables, theclass  in train:
     X.append(features)
     y.append(lables)
-for features, lables in test:
+    c.append(theclass)
+    im.append(img)
+for features, img, lables, theclass in test:
     Xt.append(features)
     yt.append(lables)
+    ct.append(theclass)
+    imt.append(img)
 temp = np.array(y)
 print(np.max(temp))
 X = np.array(X, dtype=np.float32)
@@ -73,11 +77,11 @@ print(Xt.dtype, yt.dtype)
 print(y[10:], yt[:10])
 print(X[10:], Xt[:10])
 
-check = [0, 0, 0]
+check = [0, 0, 0, 0]
 for i in range(l):
         check[y[i].numpy()] += 1
 print(check)
-check = [0, 0, 0]
+check = [0, 0, 0, 0]
 for i in range(lt):
         check[yt[i].numpy()] += 1
 print(check)
@@ -100,7 +104,6 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(9, 24)
         self.fc2 = nn.Linear(24, 8)
         self.fc3 = nn.Linear(8, 3)
-
     def forward(self, x):
         x = self.fc1(x)
         x = self.fc2(x)
@@ -141,14 +144,11 @@ def evaluate():
             # input()
             if predicted_class == real_class:
                 correct += 1
-            # else: cv2.imwrite(("D:/Datasets\stupid/test/o" + str(i) + ".jpg"), eval_X[i].view(75, 75, 1).numpy())
             total += 1
     in_sample_acc = round(correct/total, 3)
     correct = 0
     total = 0
-    # Xta = Xt[:1500]
-    # yta = yt[:1500]
-    check = [0, 0, 0]
+    check = [0, 0, 0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
             real_class = yt[i].to(device)
@@ -157,11 +157,47 @@ def evaluate():
             if predicted_class == real_class:
                 correct += 1
                 check[predicted_class.cpu().numpy()] += 1
-            # else: cv2.imwrite(("D:/Datasets\stupid/test/i" + str(i) + ".jpg"), Xt[i].view(60, 60, 1).numpy())
             total += 1
-    print(check)
     out_of_sample_acc = round(correct/total, 3)
+    print(check)
     return in_sample_acc, out_of_sample_acc
+
+def run():
+    net.eval()
+    correct = 0
+    total = 0
+    out_train = []
+    with torch.no_grad():
+        for i in tqdm(range(len(X))):
+            real_class = y[i].to(device)
+            net_out = net(X[i].view(-1, 9).to(device))[0]  # returns a list
+            predicted_class = torch.argmax(net_out)
+            out_train.append([predicted_class, im[i], y[i], c[i]])
+            # predicted cat, image, real cat, real class
+            if predicted_class == real_class:
+                correct += 1
+            total += 1
+    in_sample_acc = round(correct/total, 3)
+    correct = 0
+    total = 0
+    check = [0, 0, 0, 0]
+    out_test = []
+    with torch.no_grad():
+        for i in tqdm(range(len(Xt))):
+            real_class = yt[i].to(device)
+            net_out = net(Xt[i].view(-1, 9).to(device))[0]  # returns a list
+            predicted_class = torch.argmax(net_out)
+            out_test.append([predicted_class, imt[i], yt[i], ct[i]])
+            if predicted_class == real_class:
+                correct += 1
+                check[predicted_class.cpu().numpy()] += 1
+            total += 1
+    out_of_sample_acc = round(correct/total, 3)
+    pickle_out = open((save_dir + "fc_out.pickle"),"wb")
+    pickle.dump([out_train, out_test], pickle_out)
+    pickle_out.close()
+    print(check)
+    print(in_sample_acc, out_of_sample_acc)
 
 t0 = time.time()
 for epoch in range(EPOCHS):
@@ -189,10 +225,11 @@ for epoch in range(EPOCHS):
     print("In-sample accuracy: ", isample, "  Out-of-sample accuracy: ", osample)
     train_data.append([isample, osample])
     log.append([isample, osample, loss, dtm])
-    if osample > valid_acc_min and epoch > 10:
+    if osample > valid_acc_min and epoch > 90:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
         torch.save(net.state_dict(), "C:/Cache/PJF-30/lego_intm_3.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
+        run()
 t1 = time.time()
 time_spend = t1-t0
 
@@ -212,8 +249,4 @@ plt.ylim([0, 1])
 plt.savefig(("intm_3.pdf")) #                                              <-- UPDATE
 plt.show()
 
- # Max Out of Sample Accuracy: 0.914    3min 12s         9 - 192 - 64 - 3
- # Max Out of Sample Accuracy: 0.914    3min 11s         9 - 96 - 32 - 3
-# Max Out of Sample Accuracy: 0.871    4min 48s         9 - 48 - 16 - 3
-# Max Out of Sample Accuracy: 0.871    4min 45s         9 - 24 - 8 - 3        <-- Selected
-# Max Out of Sample Accuracy: 0.869    4min 50s         9 - 12 - 4 - 3
+# Max Out of Sample Accuracy: 0.886    6min 5s         9 - 24 - 8 - 3

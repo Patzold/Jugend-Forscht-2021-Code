@@ -38,20 +38,23 @@ if False:
         out_train = []
         out_test = []
         for subindx, dir in tqdm(enumerate(cat)):
+            actual_class = dir
+            if actual_class > 13:
+                actual_class = actual_class - 4
             path = base_dir + str(dir) + "/comp/"
             for num, img in enumerate(os.listdir(path)):
                 try:
                     img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
                     img_resz = cv2.resize(img_in, (224, 224))
                     if num < 2000:
-                        out_train.append([img_resz, indx, dir])
+                        out_train.append([img_resz, indx, actual_class])
                     else:
-                        out_test.append([img_resz, indx, dir])
+                        out_test.append([img_resz, indx, actual_class])
                 except Exception as e: pass
         random.shuffle(train)
         random.shuffle(test)
         train += out_train[:6000]
-        test += out_test[:1500]
+        test += out_test
     print(len(train), len(test))
 
     # train = np.array(train)
@@ -82,14 +85,16 @@ else:
     device = torch.device("cuda:0")
     print('CUDA is available!  Training on GPU ...')
 
-X, y, Xt, yt = [],  [], [],  []
+X, y, Xt, yt, c, ct = [],  [], [], [], [], []
 
 for features, lables, subcat in train:
     X.append(features)
     y.append(lables)
+    c.append(subcat)
 for features, lables, subcat in test:
     Xt.append(features)
     yt.append(lables)
+    ct.append(subcat)
 temp = np.array(y)
 print(np.max(temp))
 X = np.array(X, dtype=np.float32) / 255
@@ -110,11 +115,11 @@ yt.to(torch.int64)
 print(Xt.dtype, yt.dtype)
 print(y[10:], yt[:10])
 
-check = [0, 0, 0]
+check = [0, 0, 0, 0]
 for i in range(l):
         check[y[i].numpy()] += 1
 print(check)
-check = [0, 0, 0]
+check = [0, 0, 0, 0]
 for i in range(lt):
         check[yt[i].numpy()] += 1
 print(check)
@@ -122,19 +127,15 @@ print(check)
 print(fl.run(X[0].view(-1, 3, 224, 224).to(device)))
 
 intm = []
+img_in_order = []
 
 for i in tqdm(range(len(yt))):
     result = fl.run(Xt[i].view(-1, 3, 224, 224).to(device))
-    intm.append([result, yt[i].cpu().numpy().tolist()])
+    img_in_order.append([result, Xt[i].cpu().numpy(), yt[i].cpu().numpy().tolist(), ct[i]])
+    # intm results, image, category, class
 
-pickle_out = open((save_dir + "lego_intm_3t_raw.pickle"),"wb")
-pickle.dump(intm, pickle_out)
+pickle_out = open((save_dir + "lego_intm_3t_img.pickle"),"wb")
+pickle.dump(img_in_order, pickle_out)
 pickle_out.close()
 
-# intm 1t  34s
-# intm 2t  35s
-# intm 3t  35s
-
-# intm 1  2m 20s
-# intm 2  2m 26s
-# intm 3  2m 21s
+print(np.array(img_in_order).shape)
