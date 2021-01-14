@@ -207,20 +207,12 @@ total = 0
 class_correct = 0
 category_correct = 0
 
-cat_check = [0, 0, 0, 0]
-cat_total = [0, 0, 0, 0]
 class_check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 for i in tqdm(range(len(X))):
     input_tensor = X[i].view(-1, 3, 224, 224).to(device)
     correct_class = y[i].cpu().numpy().tolist()
     predicted_class = torch.argmax(model(input_tensor)[0])
-    # print(correct_class, predicted_class)
-    # input()
-    # if predicted_category == c[i]:
-    #     category_correct += 1
-    #     cat_check[predicted_category] += 1
-    # cat_total[c[i]] += 1
     if predicted_class == correct_class:
         class_correct += 1
         class_check[predicted_class-1] += 1
@@ -229,7 +221,7 @@ for i in tqdm(range(len(X))):
 print(total, category_correct, class_correct)
 print("--> ", round(category_correct / total, 3), round(class_correct / total, 3))
 print(cat_check, class_check)
-print("Category accuracy: ", [round(cat_check[i] / cat_total[i], 3) for i in range(len(cat_total))])
+print("Class accuracy: ", [round(cat_check[i] / cat_total[i], 3) for i in range(len(class_total))])
 
 # Test: 8500, 4744, 4248  --> 0.558, 0.5      (1m 45s)
 #      Cat_Check: [1215, 1736, 686, 1107]     Class_Check: [416, 412, 366, 454, 429, 408, 415, 186, 105, 125, 33, 85, 45, 0, 0, 0, 0, 263, 251, 90, 165]

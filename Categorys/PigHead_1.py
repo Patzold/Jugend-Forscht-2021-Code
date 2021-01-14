@@ -32,7 +32,7 @@ yes = [4, 5, 6, 7]
 train = []
 test = []
 
-if False:
+if True:
     out_train = []
     out_test = []
     for indx, dir in tqdm(enumerate(nos)):
@@ -259,7 +259,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_pig_1.pt") #                                                  <-- UPDATE
+        # torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_pig_1.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -277,7 +277,7 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("pig_1.pdf")) #                                              <-- UPDATE
+# plt.savefig(("pig_1.pdf")) #                                              <-- UPDATE
 plt.show()
 
 # Conv: 32, 64  FC: 300, 100

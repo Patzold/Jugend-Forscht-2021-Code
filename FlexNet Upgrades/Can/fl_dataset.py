@@ -9,7 +9,7 @@ import pickle
 from tqdm import tqdm
 import numpy as np
 
-import FirstLayer_convs as fl
+import FirstLayer_convs2 as fl
 
 import torch
 from torchvision import datasets, models, transforms

@@ -33,7 +33,7 @@ categorys = [[1, 2, 3], [4, 5, 6, 7]]
 train = []
 test = []
 
-if False:
+if True:
     for indx, cat in tqdm(enumerate(categorys)):
         out_train = []
         out_test = []
@@ -143,6 +143,7 @@ for i in tqdm(range(len(Xt))):
 print(total, category_correct, class_correct)
 print("--> ", round(category_correct / total, 3), round(class_correct / total, 3))
 print(cat_check, class_check)
+print("Category acc: ", [cat_check[i] / 2000 for i in range(len(cat_check))])
 
 # Test: 3500, 3227, 3164  --> 0.922, 0.904    (25s)
 #       Cat_Check: [1323, 1904]    Class_Check: [443, 449, 407, 481, 434, 473, 477]

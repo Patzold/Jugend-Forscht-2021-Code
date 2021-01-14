@@ -296,6 +296,6 @@ print(total, cat_correct, "  --> ", round(cat_correct/total, 3))
 
 print(check, check_correct, check_wrong)
 print(class_correct, class_wrong)
-
+print("----")
 print(class_acc)
 print(cat_acc)

@@ -1,5 +1,5 @@
 import os
-os.chdir("Categorys v2")
+os.chdir("Std Models")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -26,8 +26,8 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-nos = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-yes = [18, 19, 20, 21]
+nos = [1, 2, 3] # Rubber Toy
+yes = [4, 5, 6, 7]
 
 train = []
 test = []
@@ -42,14 +42,14 @@ if False:
                 img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
                 img_resz = cv2.resize(img_in, (224, 224))
                 if num < 2000:
-                    out_train.append([img_resz, np.eye(2)[indx]])
+                    out_train.append([img_resz, 0])
                 else:
-                    out_test.append([img_resz, np.eye(2)[indx]])
+                    out_test.append([img_resz, 0])
             except Exception as e: pass
     random.shuffle(out_train)
     random.shuffle(out_test)
-    train += out_train[:8000]
-    test += out_test[:2000]
+    train += out_train[:6000]
+    test += out_test[:1500]
     print(len(train), len(test), "\n")
     out_train = []
     out_test = []
@@ -60,28 +60,28 @@ if False:
                 img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
                 img_resz = cv2.resize(img_in, (224, 224))
                 if num < 2000:
-                    out_train.append([img_resz, np.eye(2)[indx]])
+                    out_train.append([img_resz, 1])
                 else:
-                    out_test.append([img_resz, np.eye(2)[indx]])
+                    out_test.append([img_resz, 1])
             except Exception as e: pass
     random.shuffle(out_train)
     random.shuffle(out_test)
-    train += out_train[:8000]
-    test += out_test[:2000]
+    train += out_train[:6000]
+    test += out_test[:1500]
     print(len(train), len(test))
     print(len(train), len(test))
 
     # train = np.array(train)
-    pickle_out = open((save_dir + "categorys2_can_1.pickle"),"wb")
+    pickle_out = open((save_dir + "classes_pig_1.pickle"),"wb")
     pickle.dump(train, pickle_out)
     pickle_out.close()
-    pickle_out = open((save_dir + "categorys2_can_1t.pickle"),"wb")
+    pickle_out = open((save_dir + "classes_pig_1t.pickle"),"wb")
     pickle.dump(test, pickle_out)
     pickle_out.close()
 else:
-    pickle_in = open(save_dir + "categorys2_can_1.pickle","rb")
+    pickle_in = open(save_dir + "classes_pig_1.pickle","rb")
     train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "categorys2_can_1t.pickle","rb")
+    pickle_in = open(save_dir + "classes_pig_1t.pickle","rb")
     test = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
@@ -98,33 +98,32 @@ for features, lables in test:
     Xt.append(features)
     yt.append(lables)
 temp = np.array(y)
-# print(np.max(temp))
+print(np.max(temp))
 X = np.array(X, dtype=np.float32) / 255
-y = np.array(y, dtype=np.float32)
+y = np.array(y, dtype=np.int64)
 Xt = np.array(Xt, dtype=np.float32) / 255
-yt = np.array(yt, dtype=np.float32)
+yt = np.array(yt, dtype=np.int64)
 print(np.max(X[0]), np.max(Xt[0]))
-print(y, y.shape, type(y[0]))
 
 X = torch.from_numpy(X)
 y = torch.from_numpy(y)
 X.to(torch.float32)
-y.to(torch.float32)
+y.to(torch.int64)
 print(X.dtype, y.dtype)
 Xt = torch.from_numpy(Xt)
 yt = torch.from_numpy(yt)
 Xt.to(torch.float32)
-yt.to(torch.float32)
+yt.to(torch.int64)
 print(Xt.dtype, yt.dtype)
 print(y[10:], yt[:10])
 
 check = [0, 0, 0]
 for i in range(l):
-        check[np.argmax(y[i].numpy())] += 1
+        check[y[i].numpy()] += 1
 print(check)
 check = [0, 0, 0]
 for i in range(lt):
-        check[np.argmax(yt[i].numpy())] += 1
+        check[yt[i].numpy()] += 1
 print(check)
 
 train_on_gpu = torch.cuda.is_available()
@@ -137,51 +136,97 @@ else:
     device = torch.device("cuda:0")
     print('CUDA is available!  Training on GPU ...')
 
-# THE NETWORK
-
-class Net(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.conv1 = nn.Conv2d(3, 32, 2)
-        self.conv2 = nn.Conv2d(32, 64, 2)
-        self.dropout = nn.Dropout(0.75)
-        
-        x = torch.randn(224,224,3).view(-1,3,224,224)
-        self._to_linear = None
-        self.convs(x)
-
-        self.fc1 = nn.Linear(self._to_linear, 500) #flattening.
-        self.fc2 = nn.Linear(500, 100)
-        self.fc3 = nn.Linear(100, 2)
-
-    def convs(self, x):
-            c1 = self.conv1(x)
-            relu1 = F.relu(c1)
-            pool1 = F.max_pool2d(relu1, (2, 2))
-            c2 = self.conv2(pool1)
-            relu2 = F.relu(c2)
-            pool2 = F.max_pool2d(relu2, (2, 2))
-            
-            if self._to_linear is None:
-                self._to_linear = pool2[0].shape[0]*pool2[0].shape[1]*pool2[0].shape[2]
-                print("to linear: ", self._to_linear)
-            return pool2
-
+class block(nn.Module):
+    def __init__(self, in_channels, out_channels, identity_downsample=None, stride=1):
+        super(block, self).__init__()
+        self.expansion = 4
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0)
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=stride, padding=1)
+        self.bn2 = nn.BatchNorm2d(out_channels)
+        self.conv3 = nn.Conv2d(out_channels, out_channels*self.expansion, kernel_size=1, stride=1, padding=0)
+        self.bn3 = nn.BatchNorm2d(out_channels*self.expansion)
+        self.relu = nn.ReLU()
+        self.identity_downsample = identity_downsample
+    
     def forward(self, x):
-        x = self.convs(x)
-        x = x.view(-1, self._to_linear)  # .view is reshape ... this flattens X before 
-        x = self.dropout(F.relu(self.fc1(x)))
-        x = self.dropout(F.relu(self.fc2(x)))
-        x = self.fc3(x)
+        identity = x
+        
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = self.relu(x)
+        x = self.conv3(x)
+        x = self.bn3(x)
+        
+        if self.identity_downsample is not None:
+            identity = self.identity_downsample(identity)
+        
+        x += identity
+        x = self.relu(x)
         return x
 
-net = Net()
-# torch.save(net, save_dir + "smple_conv_model.pt")
+class ResNet(nn.Module): # [3, 4, 6, 3]
+    def __init__(self, block, layers, image_channels, num_classes):
+        super(ResNet, self).__init__()
+        self.in_channels = 64
+        self.conv1 = nn.Conv2d(image_channels, 64, kernel_size=7, stride=2, padding=3)
+        self.bn1 = nn.BatchNorm2d(64)
+        self.relu = nn.ReLU()
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        
+        # ResNet layers
+        self.layer1 = self._make_layer(block, layers[0], out_channels=64, stride=1)
+        self.layer2 = self._make_layer(block, layers[1], out_channels=128, stride=2)
+        self.layer3 = self._make_layer(block, layers[2], out_channels=256, stride=2)
+        self.layer4 = self._make_layer(block, layers[3], out_channels=512, stride=2)
+        
+        self.avgpool = nn.AdaptiveAvgPool2d((1,1))
+        self.fc = nn.Linear(512*4, num_classes)
+    
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+        
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        
+        x = self.avgpool(x)
+        x = x.reshape(x.shape[0], -1)
+        x = self.fc(x)
+        
+        return x
+
+    def _make_layer(self, block, num_residual_blocks, out_channels, stride):
+        identity_downsample = None
+        layers = []
+        
+        if stride != 1 or self.in_channels != out_channels * 4:
+            identity_downsample = nn.Sequential(nn.Conv2d(self.in_channels, out_channels*4, kernel_size=1, stride=stride), nn.BatchNorm2d(out_channels*4))
+        
+        layers.append(block(self.in_channels, out_channels, identity_downsample, stride))
+        self.in_channels = out_channels*4
+        
+        for i in range(num_residual_blocks - 1):
+            layers.append(block(self.in_channels, out_channels)) # 256 --> 64, 64*4 (256) again
+        
+        return nn.Sequential(*layers)
+
+def ResNet50(img_channels=3, num_classes=17):
+    return ResNet(block, [3, 4, 6, 3], img_channels, num_classes)
+
+net = ResNet50(3, 2)
 net.to(device)
-print(net)
+net.eval()
 
 optimizer = optim.Adam(net.parameters(), lr=0.001)
-loss_function = nn.MSELoss()
+loss_function = nn.CrossEntropyLoss()
 
 BATCH_SIZE = 100
 EPOCHS = 50
@@ -203,11 +248,9 @@ def evaluate():
     total = 0
     with torch.no_grad():
         for i in tqdm(range(len(eval_X))):
-            real_class = torch.argmax(eval_y[i].to(device))
+            real_class = eval_y[i].to(device)
             net_out = net(eval_X[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
-            # print(real_class, net_out, predicted_class)
-            # input()
             if predicted_class == real_class:
                 correct += 1
             # else: cv2.imwrite(("D:/Datasets\stupid/test/o" + str(i) + ".jpg"), eval_X[i].view(75, 75, 1).numpy())
@@ -215,16 +258,12 @@ def evaluate():
     in_sample_acc = round(correct/total, 3)
     correct = 0
     total = 0
-    # Xta = Xt[:1500]
-    # yta = yt[:1500]
     check = [0, 0, 0, 0, 0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
-            real_class = torch.argmax(yt[i].to(device))
+            real_class = yt[i].to(device)
             net_out = net(Xt[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
-            # print(real_class, net_out, predicted_class)
-            # input()
             if predicted_class == real_class:
                 correct += 1
                 check[predicted_class.cpu().numpy()] += 1
@@ -249,8 +288,6 @@ for epoch in range(EPOCHS):
         net.zero_grad()
         optimizer.zero_grad()
         outputs = net(batch_X.view(-1, 3, 224, 224))
-        # print(batch_y.type(), outputs.type())
-        # input()
         loss = loss_function(outputs, batch_y)
         loss.backward()
         optimizer.step() # Does the update
@@ -262,7 +299,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys2_can_1.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_rubt_2.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -280,8 +317,5 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("2can_1.pdf")) #                                              <-- UPDATE
+plt.savefig(("rubtg_2.pdf")) #                                              <-- UPDATE
 plt.show()
-
-# Time spend: 7m 10s
-# In-sample: 97,3%   Out-of-sample: 78,3%

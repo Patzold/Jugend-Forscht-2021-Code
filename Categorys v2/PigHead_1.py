@@ -26,9 +26,8 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-nos = [1, 2, 3, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21]
+nos = [1, 2, 3] # Rubber Toy
 yes = [4, 5, 6, 7]
-all = [1, 2, 3, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21]
 
 train = []
 test = []
@@ -43,14 +42,14 @@ if False:
                 img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
                 img_resz = cv2.resize(img_in, (224, 224))
                 if num < 2000:
-                    out_train.append([img_resz, np.eye(2)[0]])
+                    out_train.append([img_resz, 0])
                 else:
-                    out_test.append([img_resz, np.eye(2)[0]])
+                    out_test.append([img_resz, 0])
             except Exception as e: pass
     random.shuffle(out_train)
     random.shuffle(out_test)
     train += out_train[:6000]
-    test += out_test[:1500]
+    test += out_test
     print(len(train), len(test), "\n")
     out_train = []
     out_test = []
@@ -61,64 +60,36 @@ if False:
                 img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
                 img_resz = cv2.resize(img_in, (224, 224))
                 if num < 2000:
-                    out_train.append([img_resz, np.eye(2)[1]])
+                    out_train.append([img_resz, 1])
                 else:
-                    out_test.append([img_resz, np.eye(2)[1]])
+                    out_test.append([img_resz, 1])
             except Exception as e: pass
     random.shuffle(out_train)
     random.shuffle(out_test)
-    train += out_train[:4000]
-    test += out_test[:1500]
+    train += out_train[:6000]
+    test += out_test
     print(len(train), len(test))
     print(len(train), len(test))
 
     # train = np.array(train)
-    pickle_out = open((save_dir + "categorys2_pig_2.pickle"),"wb")
+    pickle_out = open((save_dir + "classes_pig_1.pickle"),"wb")
     pickle.dump(train, pickle_out)
     pickle_out.close()
-    pickle_out = open((save_dir + "categorys2_pig_2t.pickle"),"wb")
+    pickle_out = open((save_dir + "classes_pig_1t.pickle"),"wb")
     pickle.dump(test, pickle_out)
     pickle_out.close()
 else:
-    pickle_in = open(save_dir + "categorys2_pig_2.pickle","rb")
+    pickle_in = open(save_dir + "classes_pig_1.pickle","rb")
     train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "categorys2_pig_2t.pickle","rb")
+    pickle_in = open(save_dir + "classes_pig_1t.pickle","rb")
     test = pickle.load(pickle_in)
-
-if False:
-    out_train = []
-    out_test = []
-    for indx, dir in tqdm(enumerate(all)):
-        path = base_dir + str(dir) + "/comp/"
-        for num, img in enumerate(os.listdir(path)):
-            try:
-                img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
-                img_resz = cv2.resize(img_in, (224, 224))
-                if num < 2000:
-                    out_train.append([img_resz, np.eye(2)[0]])
-                else:
-                    out_test.append([img_resz, np.eye(2)[0]])
-            except Exception as e: pass
-    random.shuffle(out_train)
-    random.shuffle(out_test)
-    pickle_out = open((save_dir + "cat_all_pig.pickle"),"wb")
-    pickle.dump(out_train, pickle_out)
-    pickle_out.close()
-    pickle_out = open((save_dir + "cat_all_pigt.pickle"),"wb")
-    pickle.dump(out_test, pickle_out)
-    pickle_out.close()
-else:
-    pickle_in = open(save_dir + "cat_all_pig.pickle","rb")
-    cat_all = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "cat_all_pigt.pickle","rb")
-    cat_allt = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
 print(len(train), len(test))
 random.shuffle(train)
 random.shuffle(test)
 
-X, y, Xt, yt, ay, ax, ayt, axt = [], [], [], [], [], [], [], []
+X, y, Xt, yt = [],  [], [],  []
 
 for features, lables in train:
     X.append(features)
@@ -126,52 +97,33 @@ for features, lables in train:
 for features, lables in test:
     Xt.append(features)
     yt.append(lables)
-for features, lables in cat_all:
-    ax.append(features)
-    ay.append(lables)
-for features, lables in cat_allt:
-    axt.append(features)
-    ayt.append(lables)
 temp = np.array(y)
-# print(np.max(temp))
+print(np.max(temp))
 X = np.array(X, dtype=np.float32) / 255
-y = np.array(y, dtype=np.float32)
+y = np.array(y, dtype=np.int64)
 Xt = np.array(Xt, dtype=np.float32) / 255
-yt = np.array(yt, dtype=np.float32)
-ax = np.array(ax, dtype=np.float32) / 255
-ay = np.array(ay, dtype=np.float32)
-axt = np.array(axt, dtype=np.float32) / 255
-ayt = np.array(ayt, dtype=np.float32)
+yt = np.array(yt, dtype=np.int64)
 print(np.max(X[0]), np.max(Xt[0]))
-print(y, y.shape, type(y[0]))
 
 X = torch.from_numpy(X)
 y = torch.from_numpy(y)
 X.to(torch.float32)
-y.to(torch.float32)
+y.to(torch.int64)
 print(X.dtype, y.dtype)
 Xt = torch.from_numpy(Xt)
 yt = torch.from_numpy(yt)
 Xt.to(torch.float32)
-yt.to(torch.float32)
+yt.to(torch.int64)
 print(Xt.dtype, yt.dtype)
-ax = torch.from_numpy(ax)
-ay = torch.from_numpy(ay)
-ax.to(torch.float32)
-ay.to(torch.float32)
-axt = torch.from_numpy(axt)
-ayt = torch.from_numpy(ayt)
-axt.to(torch.float32)
-ayt.to(torch.float32)
 print(y[10:], yt[:10])
 
 check = [0, 0, 0]
 for i in range(l):
-        check[np.argmax(y[i].numpy())] += 1
+        check[y[i].numpy()] += 1
 print(check)
 check = [0, 0, 0]
 for i in range(lt):
-        check[np.argmax(yt[i].numpy())] += 1
+        check[yt[i].numpy()] += 1
 print(check)
 
 train_on_gpu = torch.cuda.is_available()
@@ -189,16 +141,16 @@ else:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 32, 2)
-        self.conv2 = nn.Conv2d(32, 64, 2)
-        self.dropout = nn.Dropout(0.75)
+        self.conv1 = nn.Conv2d(3, 42, 2)
+        self.conv2 = nn.Conv2d(42, 84, 2)
+        self.dropout = nn.Dropout(0.8)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
         self.convs(x)
 
-        self.fc1 = nn.Linear(self._to_linear, 300) #flattening.
-        self.fc2 = nn.Linear(300, 100)
+        self.fc1 = nn.Linear(self._to_linear, 500) #flattening.
+        self.fc2 = nn.Linear(500, 100)
         self.fc3 = nn.Linear(100, 2)
 
     def convs(self, x):
@@ -228,7 +180,7 @@ net.to(device)
 print(net)
 
 optimizer = optim.Adam(net.parameters(), lr=0.001)
-loss_function = nn.MSELoss()
+loss_function = nn.CrossEntropyLoss()
 
 BATCH_SIZE = 100
 EPOCHS = 50
@@ -250,7 +202,7 @@ def evaluate():
     total = 0
     with torch.no_grad():
         for i in tqdm(range(len(eval_X))):
-            real_class = torch.argmax(eval_y[i].to(device))
+            real_class = eval_y[i].to(device)
             net_out = net(eval_X[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
             # print(real_class, net_out, predicted_class)
@@ -264,53 +216,19 @@ def evaluate():
     total = 0
     # Xta = Xt[:1500]
     # yta = yt[:1500]
-    check = [0, 0]
-    realcheck = [0, 0]
+    check = [0, 0, 0, 0, 0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
-            real_class = torch.argmax(yt[i].to(device))
-            realcheck[real_class] += 1
+            real_class = yt[i].to(device)
             net_out = net(Xt[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
-            # print(real_class, net_out, predicted_class)
-            # input()
             if predicted_class == real_class:
                 correct += 1
                 check[predicted_class.cpu().numpy()] += 1
             # else: cv2.imwrite(("D:/Datasets\stupid/test/i" + str(i) + ".jpg"), Xt[i].view(60, 60, 1).numpy())
             total += 1
-    print(check, realcheck, total, correct, "--------------------------")
+    print(check)
     out_of_sample_acc = round(correct/total, 3)
-    # with torch.no_grad():
-        # total = 0
-        # correct = 0
-        # check = [0, 0]
-        # realcheck = [0, 0]
-        # print("Predicted Class distribution - real class distribution - total, correct")
-        # with torch.no_grad():
-        #     for i in range(len(ay)):
-        #         real_class = torch.argmax(ay[i].to(device))
-        #         realcheck[real_class] += 1
-        #         net_out = net(ax[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
-        #         predicted_class = torch.argmax(net_out)
-        #         check[predicted_class] += 1
-        #         if predicted_class == real_class: correct += 1
-        #         total += 1
-        # print("All: ", check, realcheck, total, correct)
-        # total = 0
-        # correct = 0
-        # check = [0, 0]
-        # realcheck = [0, 0]
-        # with torch.no_grad():
-        #     for i in range(len(ayt)):
-        #         real_class = torch.argmax(ayt[i].to(device))
-        #         realcheck[real_class] += 1
-        #         net_out = net(axt[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
-        #         predicted_class = torch.argmax(net_out)
-        #         check[predicted_class] += 1
-        #         if predicted_class == real_class: correct += 1
-        #         total += 1
-        # print("All test: ", check, realcheck, total, correct)    
     return in_sample_acc, out_of_sample_acc
 
 t0 = time.time()
@@ -328,7 +246,7 @@ for epoch in range(EPOCHS):
         net.zero_grad()
         optimizer.zero_grad()
         outputs = net(batch_X.view(-1, 3, 224, 224))
-        # print(batch_y.type(), outputs.type())
+        # print(batch_y, outputs)
         # input()
         loss = loss_function(outputs, batch_y)
         loss.backward()
@@ -341,7 +259,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys2_pig_1.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_pig_2.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -359,12 +277,8 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("2pig_1.pdf")) #                                              <-- UPDATE
+plt.savefig(("pig_2.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# [988, 958] [1000, 1000] 2000 1946 --------------------------
-# Predicted Class distribution - real class distribution - total, correct
-# All:  [5672, 828] [6500, 0] 6500 5672
-# All test:  [23034, 2966] [26000, 0] 26000 23034
-# In-sample accuracy:  0.996   Out-of-sample accuracy:  0.973
-# Time spend: 54m
+# Conv: 50, 100  FC: 500, 100
+# Max Out of Sample Accuracy: 0.907    11min 11s (Adam, 0.001)  (2)   <-- Selected
