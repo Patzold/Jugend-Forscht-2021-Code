@@ -43,7 +43,7 @@ fc_out = pickle.load(pickle_in)
 out_train, out_test = fc_out
 print(len(out_train), len(out_test))
 print(len(out_train[0]), len(out_test[0]))
-print(out_train[0], out_test[0])
+# print(out_train[0], out_test[0])
 
 predicted_category, images, real_category, real_class, predicted_categoryt, imagest, real_categoryt, real_classt = [], [], [], [], [], [], [], []
 
@@ -235,6 +235,13 @@ cans.eval()
 correct = 0
 cat_correct = 0
 total = 0
+cat_total = [0, 0, 0, 0]
+check = [0, 0, 0, 0]
+check_correct = [0, 0, 0, 0]
+check_wrong = [0, 0, 0, 0]
+class_correct = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+class_wrong = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+class_total = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 with torch.no_grad():
     for i in tqdm(range(len(predicted_categoryt))):
         total += 1
@@ -243,23 +250,52 @@ with torch.no_grad():
         correct_class = real_classt[i]
         input_tensor = torch.from_numpy(imagest[i]).to(device).to(torch.float32).view(-1, 3, 224, 224)
         if pc == 0:
-            # if pc == correct_category: cat_correct += 1
-            # else:
-            #     print(pc, correct_category)
-            #     input()
+            check[0] += 1
+            if pc == correct_category:
+                cat_correct += 1
+                check_correct[0] += 1
+            else:
+                check_wrong[0] += 1
             predicted_class = torch.argmax(rubberts(input_tensor)).cpu().numpy().tolist() + 1
         elif pc == 1:
-            if pc == correct_category: cat_correct += 1
+            check[1] += 1
+            if pc == correct_category:
+                cat_correct += 1
+                check_correct[1] += 1
+            else:
+                check_wrong[1] += 1
             predicted_class = torch.argmax(pigs(input_tensor)).cpu().numpy().tolist() + 4
         elif pc == 2:
-            if pc == correct_category: cat_correct += 1
+            check[2] += 1
+            if pc == correct_category:
+                cat_correct += 1
+                check_correct[2] += 1
+            else:
+                check_wrong[2] += 1
             predicted_class = torch.argmax(legos(input_tensor)).cpu().numpy().tolist() + 8
         elif pc == 3:
-            if pc == correct_category: cat_correct += 1
+            check[3] += 1
+            if pc == correct_category:
+                cat_correct += 1
+                check_correct[3] += 1
+            else:
+                check_wrong[3] += 1
             predicted_class = torch.argmax(cans(input_tensor)).cpu().numpy().tolist() + 14
         else:
             raise Exception("A serious problem just occoured.")
-        if predicted_class == correct_class: correct += 1
-
+        if predicted_class == correct_class:
+            correct += 1
+            class_correct[correct_class-1] += 1
+        else: class_wrong[predicted_class-1] += 1
+        cat_total[correct_category] += 1
+        class_total[correct_class-1] += 1
+class_acc = [round(class_correct[i] / class_total[i], 3) for i in range(len(class_total))]
+cat_acc = [round(check_correct[i] / cat_total[i], 3) for i in range(len(cat_total))]
 print(total, correct, "  --> ", round(correct/total, 3))
-print(cat_correct)
+print(total, cat_correct, "  --> ", round(cat_correct/total, 3))
+
+print(check, check_correct, check_wrong)
+print(class_correct, class_wrong)
+
+print(class_acc)
+print(cat_acc)

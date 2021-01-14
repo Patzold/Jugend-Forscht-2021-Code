@@ -285,7 +285,7 @@ plt.savefig(("can_1.pdf")) #                                              <-- UP
 plt.show()
 
 # Conv: 32, 64, 128  Drop: 0.8   FC: 700, 100
-# Max Out of Sample Accuracy: 0.884    11min 40s (Adam, 0.001)  (1)   <-- Selected
+# Max Out of Sample Accuracy: 0.893    11min 40s (Adam, 0.001)  (1)   <-- Selected
 
 # Conv: 50, 100, 200 Drop: 0.75  FC: 700, 100
 # Max Out of Sample Accuracy: 0.881    18min 03s (Adam, 0.001)  (1_1)

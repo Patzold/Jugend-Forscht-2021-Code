@@ -26,7 +26,7 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-nos = [1, 2, 3, 4, 5, 6, 7, 18, 19, 20, 21] # Rubber Toy, Pig Head, Lego
+nos = [1, 2, 3, 4, 5, 6, 7, 18, 19, 20, 21] # Rubber Toy
 yes = [8, 9, 10, 11, 12, 13]
 
 train = []
@@ -72,16 +72,16 @@ if True:
     print(len(train), len(test))
 
     # train = np.array(train)
-    pickle_out = open((save_dir + "classes_lego_2.pickle"),"wb")
+    pickle_out = open((save_dir + "classes_lego_1.pickle"),"wb")
     pickle.dump(train, pickle_out)
     pickle_out.close()
-    pickle_out = open((save_dir + "classes_lego_2t.pickle"),"wb")
+    pickle_out = open((save_dir + "classes_lego_1t.pickle"),"wb")
     pickle.dump(test, pickle_out)
     pickle_out.close()
 else:
-    pickle_in = open(save_dir + "classes_lego_2.pickle","rb")
+    pickle_in = open(save_dir + "classes_lego_1.pickle","rb")
     train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "classes_lego_2t.pickle","rb")
+    pickle_in = open(save_dir + "classes_lego_1t.pickle","rb")
     test = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
@@ -259,7 +259,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_lego_2.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_lego_1.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -277,8 +277,8 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("lego_2.pdf")) #                                              <-- UPDATE
+plt.savefig(("lego_1.pdf")) #                                              <-- UPDATE
 plt.show()
 
 # Conv: 32, 64  FC: 300, 100
-# Max Out of Sample Accuracy: 0.916    21min 38s (Adam, 0.001) (1)   <-- Selected
+# Max Out of Sample Accuracy: 0.916    22min 46s (Adam, 0.001) (1)   <-- Selected

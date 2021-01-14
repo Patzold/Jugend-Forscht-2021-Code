@@ -1,5 +1,5 @@
 import os
-os.chdir("FlexNet Upgrades/Lego")
+os.chdir("FlexNet Upgrades/Can")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -33,7 +33,7 @@ categorys = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11, 12, 13], [18, 19, 20, 21]]
 train = []
 test = []
 
-if False:
+if True:
     for indx, cat in tqdm(enumerate(categorys)):
         out_train = []
         out_test = []
@@ -54,7 +54,7 @@ if False:
         random.shuffle(train)
         random.shuffle(test)
         train += out_train[:6000]
-        test += out_test[:1500]
+        test += out_test
     print(len(train), len(test))
 
     # train = np.array(train)
@@ -129,25 +129,13 @@ print(fl.run(X[0].view(-1, 3, 224, 224).to(device)))
 intm = []
 img_in_order = []
 
-for i in tqdm(range(len(y))):
-    result = fl.run(X[i].view(-1, 3, 224, 224).to(device))
-    img_in_order.append([result, X[i].cpu().numpy(), y[i].cpu().numpy().tolist(), c[i]])
+for i in tqdm(range(len(yt))):
+    result = fl.run(Xt[i].view(-1, 3, 224, 224).to(device))
+    img_in_order.append([result, Xt[i].cpu().numpy(), yt[i].cpu().numpy().tolist(), ct[i]])
     # intm results, image, category, class
 
-pickle_out = open((save_dir + "can_intm_3_img.pickle"),"wb")
+pickle_out = open((save_dir + "can_intm_3t_img.pickle"),"wb")
 pickle.dump(img_in_order, pickle_out)
 pickle_out.close()
 
 print(np.array(img_in_order).shape)
-
-# pickle_out = open((save_dir + "can_intm_3t_raw2.pickle"),"wb")
-# pickle.dump(intm, pickle_out)
-# pickle_out.close()
-
-# intm 1t  1m 5s
-# intm 2t  1m 5s
-# intm 3t  1m 5s
-
-# intm 1  4m 26s
-# intm 2  4m 27s
-# intm 3  4m 25s

@@ -9,7 +9,7 @@ import pickle
 from tqdm import tqdm
 import numpy as np
 
-import FirstLayer_convs as fl
+import FirstLayer_convs2 as fl
 
 import torch
 from torchvision import datasets, models, transforms
@@ -129,12 +129,12 @@ print(fl.run(X[0].view(-1, 3, 224, 224).to(device)))
 intm = []
 img_in_order = []
 
-for i in tqdm(range(len(y))):
-    result = fl.run(X[i].view(-1, 3, 224, 224).to(device))
-    img_in_order.append([result, X[i].cpu().numpy(), y[i].cpu().numpy().tolist(), c[i]])
+for i in tqdm(range(len(yt))):
+    result = fl.run(Xt[i].view(-1, 3, 224, 224).to(device))
+    img_in_order.append([result, Xt[i].cpu().numpy(), yt[i].cpu().numpy().tolist(), ct[i]])
     # intm results, image, category, class
 
-pickle_out = open((save_dir + "baseline_intm_3_img.pickle"),"wb")
+pickle_out = open((save_dir + "baseline_intm_3t_img.pickle"),"wb")
 pickle.dump(img_in_order, pickle_out)
 pickle_out.close()
 
