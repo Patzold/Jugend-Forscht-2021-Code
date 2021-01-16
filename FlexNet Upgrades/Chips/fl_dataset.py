@@ -28,12 +28,12 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-categorys = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11, 12, 13], [18, 19, 20, 21, 22]]
+categorys = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11, 12, 13], [18, 19, 20]]
 
 train = []
 test = []
 
-if True:
+if False:
     for indx, cat in tqdm(enumerate(categorys)):
         out_train = []
         out_test = []
@@ -129,12 +129,12 @@ print(fl.run(X[0].view(-1, 3, 224, 224).to(device)))
 intm = []
 img_in_order = []
 
-for i in tqdm(range(len(y))):
-    result = fl.run(X[i].view(-1, 3, 224, 224).to(device))
-    img_in_order.append([result, X[i].cpu().numpy(), y[i].cpu().numpy().tolist(), c[i]])
+for i in tqdm(range(len(yt))):
+    result = fl.run(Xt[i].view(-1, 3, 224, 224).to(device))
+    img_in_order.append([result, Xt[i].cpu().numpy(), yt[i].cpu().numpy().tolist(), ct[i]])
     # intm results, image, category, class
 
-pickle_out = open((save_dir + "can_intm_3_img.pickle"),"wb")
+pickle_out = open((save_dir + "chips_intm_3t_img.pickle"),"wb")
 pickle.dump(img_in_order, pickle_out)
 pickle_out.close()
 

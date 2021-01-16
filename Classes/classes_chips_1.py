@@ -26,12 +26,12 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-categorys = [18, 19, 20, 21]
+categorys = [18, 19, 20]
 
 train = []
 test = []
 
-if True:
+if False:
     for dir in tqdm(categorys):
         path = base_dir + str(dir) + "/comp/"
         for num, img in enumerate(os.listdir(path)):
@@ -118,14 +118,14 @@ class Net(nn.Module):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 50, 2)
         self.conv2 = nn.Conv2d(50, 100, 2)
-        self.dropout = nn.Dropout(0.7)
+        self.dropout = nn.Dropout(0.8)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
         self.convs(x)
 
-        self.fc1 = nn.Linear(self._to_linear, 500) #flattening.
-        self.fc2 = nn.Linear(500, 100)
+        self.fc1 = nn.Linear(self._to_linear, 800) #flattening.
+        self.fc2 = nn.Linear(800, 100)
         self.fc3 = nn.Linear(100, 4)
 
     def convs(self, x):
@@ -150,11 +150,10 @@ class Net(nn.Module):
         return x
 
 net = Net()
-# torch.save(net, save_dir + "smple_conv_model.pt")
 net.to(device)
 print(net)
 
-optimizer = optim.Adam(net.parameters(), lr=0.001) #optim.SGD(net.parameters(), lr=0.01)
+optimizer = optim.Adam(net.parameters(), lr=0.0015) #optim.SGD(net.parameters(), lr=0.01)
 loss_function = nn.CrossEntropyLoss()
 
 BATCH_SIZE = 100
@@ -179,28 +178,23 @@ def evaluate():
             real_class = eval_y[i].to(device)
             net_out = net(eval_X[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
-            # print(real_class, net_out, predicted_class)
-            # input()
             if predicted_class == real_class:
                 correct += 1
-            # else: cv2.imwrite(("D:/Datasets\stupid/test/o" + str(i) + ".jpg"), eval_X[i].view(75, 75, 1).numpy())
             total += 1
     in_sample_acc = round(correct/total, 3)
     correct = 0
     total = 0
-    Xta = Xt[:1500]
-    yta = yt[:1500]
+    check = [0, 0, 0, 0]
     with torch.no_grad():
-        for i in tqdm(range(len(Xta))):
-            real_class = yta[i].to(device)
-            net_out = net(Xta[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
+        for i in tqdm(range(len(Xt))):
+            real_class = yt[i].to(device)
+            net_out = net(Xt[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
-            # print(real_class, net_out, predicted_class)
-            # input()
             if predicted_class == real_class:
                 correct += 1
-            # else: cv2.imwrite(("D:/Datasets\stupid/test/i" + str(i) + ".jpg"), Xt[i].view(60, 60, 1).numpy())
+                check[predicted_class] += 1
             total += 1
+    print(check)
     out_of_sample_acc = round(correct/total, 3)
     return in_sample_acc, out_of_sample_acc
 
@@ -219,8 +213,6 @@ for epoch in range(EPOCHS):
         net.zero_grad()
         optimizer.zero_grad()
         outputs = net(batch_X.view(-1, 3, 224, 224))
-        # print(batch_y, outputs)
-        # input()
         loss = loss_function(outputs, batch_y)
         loss.backward()
         optimizer.step() # Does the update
@@ -232,10 +224,11 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/classes_can_1.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/classes_chips_1.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
+print(valid_acc_min)
 print("Time spend: ", time_spend)
 
 train_data = np.array(train_data)
@@ -250,14 +243,8 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("classes_can_1.pdf")) #                                              <-- UPDATE
+plt.savefig(("classes_chips_1.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# Conv: 12, 24  FC: 200, 100
-# Max Out of Sample Accuracy: 0.679    8min 35s (Adam, 0.001, Dropout 0.7)
-
-# Conv: 32, 64  FC: 300, 100
-# Max Out of Sample Accuracy: 0.739    13min 6s (Adam, 0.001, Dropout 0.7) (1_1)
-
-# Conv: 50, 100  FC: 500, 100
-# Max Out of Sample Accuracy: 0.756    11min 30s (Adam, 0.001, Dropout 0.7) (1)    <-- SELECTED
+# Conv: 50, 100  FC: 800, 100
+# Max Out of Sample Accuracy: 0.887    12min 45s (Adam, 0.0015, Dropout 0.8) (1)    <-- SELECTED

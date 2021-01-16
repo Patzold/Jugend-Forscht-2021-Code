@@ -1,5 +1,5 @@
 import os
-os.chdir("Categorys v2")
+os.chdir("Categorys")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -26,13 +26,13 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-nos = [1, 2, 3] # Rubber Toy
-yes = [4, 5, 6, 7]
+nos = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 18, 19, 20] # Pig Head
+yes = [1, 2, 3]
 
 train = []
 test = []
 
-if False:
+if True:
     out_train = []
     out_test = []
     for indx, dir in tqdm(enumerate(nos)):
@@ -49,7 +49,7 @@ if False:
     random.shuffle(out_train)
     random.shuffle(out_test)
     train += out_train[:6000]
-    test += out_test
+    test += out_test[:1500]
     print(len(train), len(test), "\n")
     out_train = []
     out_test = []
@@ -67,21 +67,21 @@ if False:
     random.shuffle(out_train)
     random.shuffle(out_test)
     train += out_train[:6000]
-    test += out_test
+    test += out_test[:1500]
     print(len(train), len(test))
     print(len(train), len(test))
 
     # train = np.array(train)
-    pickle_out = open((save_dir + "classes_pig_1.pickle"),"wb")
+    pickle_out = open((save_dir + "categorys_rubt_1.pickle"),"wb")
     pickle.dump(train, pickle_out)
     pickle_out.close()
-    pickle_out = open((save_dir + "classes_pig_1t.pickle"),"wb")
+    pickle_out = open((save_dir + "categorys_rubt_1t.pickle"),"wb")
     pickle.dump(test, pickle_out)
     pickle_out.close()
 else:
-    pickle_in = open(save_dir + "classes_pig_1.pickle","rb")
+    pickle_in = open(save_dir + "categorys_rubt_1.pickle","rb")
     train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "classes_pig_1t.pickle","rb")
+    pickle_in = open(save_dir + "categorys_rubt_1t.pickle","rb")
     test = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
@@ -141,16 +141,16 @@ else:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 42, 2)
-        self.conv2 = nn.Conv2d(42, 84, 2)
-        self.dropout = nn.Dropout(0.8)
+        self.conv1 = nn.Conv2d(3, 32, 2)
+        self.conv2 = nn.Conv2d(32, 64, 2)
+        self.dropout = nn.Dropout(0.75)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
         self.convs(x)
 
-        self.fc1 = nn.Linear(self._to_linear, 500) #flattening.
-        self.fc2 = nn.Linear(500, 100)
+        self.fc1 = nn.Linear(self._to_linear, 300) #flattening.
+        self.fc2 = nn.Linear(300, 100)
         self.fc3 = nn.Linear(100, 2)
 
     def convs(self, x):
@@ -259,7 +259,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_pig_2.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_rubt_2.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -277,8 +277,18 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("pig_2.pdf")) #                                              <-- UPDATE
+plt.savefig(("rubt_2.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# Conv: 50, 100  FC: 500, 100
-# Max Out of Sample Accuracy: 0.930    1h 12min 46s (Adam, 0.001)  (2)   <-- Selected
+# Conv: 32, 42  FC: 500, 100
+# Max Out of Sample Accuracy: 0.844    7min 47s (SGD, 0.1)
+# Max Out of Sample Accuracy: 0.848    8min 8s (Adam, 0.001)
+
+# Conv: 24, 32  FC: 400, 100
+# Max Out of Sample Accuracy: 0.899    9min 20s (Adam, 0.001)  (1)
+
+# Conv: 32, 64  FC: 200, 100
+# Max Out of Sample Accuracy: 0.897    9min 20s (Adam, 0.001)  (1_1)
+
+# Conv: 32, 64  FC: 300, 100
+# Max Out of Sample Accuracy: 0.904    10min 52s (Adam, 0.001)  (1_1)  <-- Selected

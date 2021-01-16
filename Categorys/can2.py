@@ -66,7 +66,7 @@ if True:
             except Exception as e: pass
     random.shuffle(out_train)
     random.shuffle(out_test)
-    train += out_train[:10000]
+    train += out_train[:4000]
     test += out_test[:2500]
     print(len(train), len(test))
     print(len(train), len(test))
@@ -277,4 +277,4 @@ plt.savefig(("can_2.pdf")) #                                              <-- UP
 plt.show()
 
 # Conv: 32, 64, 128  Drop: 0.8   FC: 700, 100
-# Max Out of Sample Accuracy: 0.893    12min 15s (Adam, 0.001)  (2)   <-- Selected
+# Max Out of Sample Accuracy: 0.853    9min 44s (Adam, 0.001)  (2)   <-- Selected

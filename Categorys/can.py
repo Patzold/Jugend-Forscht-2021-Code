@@ -32,7 +32,7 @@ yes = [18, 19, 20, 21]
 train = []
 test = []
 
-if False:
+if True:
     out_train = []
     out_test = []
     for indx, dir in tqdm(enumerate(nos)):
@@ -66,7 +66,7 @@ if False:
             except Exception as e: pass
     random.shuffle(out_train)
     random.shuffle(out_test)
-    train += out_train[:12000]
+    train += out_train[:4000]
     test += out_test[:3000]
     print(len(train), len(test))
     print(len(train), len(test))

@@ -26,12 +26,12 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-categorys = [18, 19, 20, 21]
+categorys = [18, 19, 20]
 
 train = []
 test = []
 
-if False:
+if True:
     for dir in tqdm(categorys):
         path = base_dir + str(dir) + "/comp/"
         for num, img in enumerate(os.listdir(path)):
@@ -128,7 +128,7 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(self._to_linear, 1000) #flattening.
         self.fc2 = nn.Linear(1000, 200)
         self.fc3 = nn.Linear(200, 100)
-        self.fc4 = nn.Linear(100, 4)
+        self.fc4 = nn.Linear(100, 3)
 
     def convs(self, x):
             c1 = self.conv1(x)
@@ -201,8 +201,6 @@ def evaluate():
             real_class = yta[i].to(device)
             net_out = net(Xta[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
-            # print(real_class, net_out, predicted_class)
-            # input()
             if predicted_class == real_class:
                 correct += 1
             # else: cv2.imwrite(("D:/Datasets\stupid/test/i" + str(i) + ".jpg"), Xt[i].view(60, 60, 1).numpy())
@@ -238,7 +236,7 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/classes_can_1.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/classes_can_2.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
@@ -256,7 +254,7 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("classes_can_1.pdf")) #                                              <-- UPDATE
+plt.savefig(("classes_can_2.pdf")) #                                              <-- UPDATE
 plt.show()
 
 # Conv: 50, 100  FC: 500, 100

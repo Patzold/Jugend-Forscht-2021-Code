@@ -1,5 +1,5 @@
 import os
-os.chdir("Categorys v2")
+os.chdir("Categorys")
 import random
 import matplotlib.pyplot as plt
 import datetime
@@ -26,13 +26,13 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-nos = [1, 2, 3] # Rubber Toy
-yes = [4, 5, 6, 7]
+nos = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] # Rubber Toy
+yes = [18, 19, 20]
 
 train = []
 test = []
 
-if False:
+if True:
     out_train = []
     out_test = []
     for indx, dir in tqdm(enumerate(nos)):
@@ -48,8 +48,8 @@ if False:
             except Exception as e: pass
     random.shuffle(out_train)
     random.shuffle(out_test)
-    train += out_train[:6000]
-    test += out_test
+    train += out_train[:4000]
+    test += out_test[:1000]
     print(len(train), len(test), "\n")
     out_train = []
     out_test = []
@@ -66,22 +66,22 @@ if False:
             except Exception as e: pass
     random.shuffle(out_train)
     random.shuffle(out_test)
-    train += out_train[:6000]
-    test += out_test
+    train += out_train[:4000]
+    test += out_test[:3000]
     print(len(train), len(test))
     print(len(train), len(test))
 
     # train = np.array(train)
-    pickle_out = open((save_dir + "classes_pig_1.pickle"),"wb")
+    pickle_out = open((save_dir + "classes_can_1.pickle"),"wb")
     pickle.dump(train, pickle_out)
     pickle_out.close()
-    pickle_out = open((save_dir + "classes_pig_1t.pickle"),"wb")
+    pickle_out = open((save_dir + "classes_can_1t.pickle"),"wb")
     pickle.dump(test, pickle_out)
     pickle_out.close()
 else:
-    pickle_in = open(save_dir + "classes_pig_1.pickle","rb")
+    pickle_in = open(save_dir + "classes_can_1.pickle","rb")
     train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "classes_pig_1t.pickle","rb")
+    pickle_in = open(save_dir + "classes_can_1t.pickle","rb")
     test = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
@@ -117,11 +117,11 @@ yt.to(torch.int64)
 print(Xt.dtype, yt.dtype)
 print(y[10:], yt[:10])
 
-check = [0, 0, 0]
+check = [0, 0, 0, 0, 0, 0]
 for i in range(l):
         check[y[i].numpy()] += 1
 print(check)
-check = [0, 0, 0]
+check = [0, 0, 0, 0, 0, 0]
 for i in range(lt):
         check[yt[i].numpy()] += 1
 print(check)
@@ -141,30 +141,34 @@ else:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 42, 2)
-        self.conv2 = nn.Conv2d(42, 84, 2)
+        self.conv1 = nn.Conv2d(3, 32, 2)
+        self.conv2 = nn.Conv2d(32, 64, 2)
+        self.conv3 = nn.Conv2d(64, 128, 2)
         self.dropout = nn.Dropout(0.8)
         
         x = torch.randn(224,224,3).view(-1,3,224,224)
         self._to_linear = None
         self.convs(x)
 
-        self.fc1 = nn.Linear(self._to_linear, 500) #flattening.
-        self.fc2 = nn.Linear(500, 100)
+        self.fc1 = nn.Linear(self._to_linear, 1000) #flattening.
+        self.fc2 = nn.Linear(1000, 100)
         self.fc3 = nn.Linear(100, 2)
 
     def convs(self, x):
-            c1 = self.conv1(x)
-            relu1 = F.relu(c1)
-            pool1 = F.max_pool2d(relu1, (2, 2))
-            c2 = self.conv2(pool1)
-            relu2 = F.relu(c2)
-            pool2 = F.max_pool2d(relu2, (2, 2))
+            x = self.conv1(x)
+            x = F.relu(x)
+            x = F.max_pool2d(x, (2, 2))
+            x = self.conv2(x)
+            x = F.relu(x)
+            x = F.max_pool2d(x, (2, 2))
+            x = self.conv3(x)
+            x = F.relu(x)
+            x = F.max_pool2d(x, (2, 2))
             
             if self._to_linear is None:
-                self._to_linear = pool2[0].shape[0]*pool2[0].shape[1]*pool2[0].shape[2]
+                self._to_linear = x[0].shape[0]*x[0].shape[1]*x[0].shape[2]
                 print("to linear: ", self._to_linear)
-            return pool2
+            return x
 
     def forward(self, x):
         x = self.convs(x)
@@ -175,7 +179,6 @@ class Net(nn.Module):
         return x
 
 net = Net()
-# torch.save(net, save_dir + "smple_conv_model.pt")
 net.to(device)
 print(net)
 
@@ -205,17 +208,12 @@ def evaluate():
             real_class = eval_y[i].to(device)
             net_out = net(eval_X[i].view(-1, 3, 224, 224).to(device))[0]  # returns a list
             predicted_class = torch.argmax(net_out)
-            # print(real_class, net_out, predicted_class)
-            # input()
             if predicted_class == real_class:
                 correct += 1
-            # else: cv2.imwrite(("D:/Datasets\stupid/test/o" + str(i) + ".jpg"), eval_X[i].view(75, 75, 1).numpy())
             total += 1
     in_sample_acc = round(correct/total, 3)
     correct = 0
     total = 0
-    # Xta = Xt[:1500]
-    # yta = yt[:1500]
     check = [0, 0, 0, 0, 0, 0]
     with torch.no_grad():
         for i in tqdm(range(len(Xt))):
@@ -225,7 +223,6 @@ def evaluate():
             if predicted_class == real_class:
                 correct += 1
                 check[predicted_class.cpu().numpy()] += 1
-            # else: cv2.imwrite(("D:/Datasets\stupid/test/i" + str(i) + ".jpg"), Xt[i].view(60, 60, 1).numpy())
             total += 1
     print(check)
     out_of_sample_acc = round(correct/total, 3)
@@ -246,8 +243,6 @@ for epoch in range(EPOCHS):
         net.zero_grad()
         optimizer.zero_grad()
         outputs = net(batch_X.view(-1, 3, 224, 224))
-        # print(batch_y, outputs)
-        # input()
         loss = loss_function(outputs, batch_y)
         loss.backward()
         optimizer.step() # Does the update
@@ -259,11 +254,12 @@ for epoch in range(EPOCHS):
     log.append([isample, osample, loss, dtm])
     if osample > valid_acc_min and epoch > 10:
         print('Acc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_acc_min, osample))
-        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_pig_2.pt") #                                                  <-- UPDATE
+        torch.save(net.state_dict(), "C:/Cache/PJF-30/categorys_chips_2.pt") #                                                  <-- UPDATE
         valid_acc_min = osample
 t1 = time.time()
 time_spend = t1-t0
 
+print(valid_acc_min)
 print("Time spend:", time_spend)
 train_data = np.array(train_data)
 isample = train_data[:, 0]
@@ -277,8 +273,11 @@ plt.xlabel("Epochs")
 plt.ylabel("Accuracy (in percentages)")
 plt.legend(["in-sample", "out-of-sample"], loc="lower right")
 plt.ylim([0, 1])
-plt.savefig(("pig_2.pdf")) #                                              <-- UPDATE
+plt.savefig(("chips_2.pdf")) #                                              <-- UPDATE
 plt.show()
 
-# Conv: 50, 100  FC: 500, 100
-# Max Out of Sample Accuracy: 0.930    1h 12min 46s (Adam, 0.001)  (2)   <-- Selected
+# Conv: 50, 100, 200 Drop: 0.8  FC: 1000, 100
+# Max Out of Sample Accuracy: 0.847    9min 16s (Adam, 0.001)  (1_1)
+
+# Conv: 50, 100, 200 Drop: 0.8  FC: 1000, 100
+# Max Out of Sample Accuracy: 0.847    9min 47s (Adam, 0.001)  (2)

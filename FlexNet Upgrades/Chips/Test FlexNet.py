@@ -9,7 +9,7 @@ import pickle
 from tqdm import tqdm
 import numpy as np
 
-import FlexNet_part2 as flex
+import FlexNet as flex
 
 import torch
 from torchvision import datasets, models, transforms
@@ -28,24 +28,20 @@ torch.backends.cudnn.deterministic = True
 
 base_dir = "C:/Datasets/PJF-30/data/"
 save_dir = "C:/Datasets/PJF-30/safe/"
-# categorys = [18, 19, 20, 21]
-categorys = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11, 12, 13], [18, 19, 20, 21, 22]]
-the_category = 2
+categorys = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11, 12, 13], [18, 19, 20, 21]]
 
 train = []
 test = []
 
-if True:
-    for indx, cat in enumerate(categorys):
-        if indx < 3: continue
-        for dir in tqdm(cat):
-            out_train = []
-            out_test = []
+if False:
+    for indx, cat in tqdm(enumerate(categorys)):
+        out_train = []
+        out_test = []
+        for subindx, dir in tqdm(enumerate(cat)):
             actual_class = dir
             if actual_class > 13:
                 actual_class = actual_class - 4
             path = base_dir + str(dir) + "/comp/"
-            print(indx, dir, actual_class)
             for num, img in enumerate(os.listdir(path)):
                 try:
                     img_in = cv2.imread((path + "/" + img), cv2.IMREAD_COLOR)
@@ -55,23 +51,23 @@ if True:
                     else:
                         out_test.append([img_resz, indx, actual_class])
                 except Exception as e: pass
-            random.shuffle(train)
-            random.shuffle(test)
-            train += out_train #[:6000]
-            test += out_test #[:1500]
+        random.shuffle(train)
+        random.shuffle(test)
+        train += out_train #[:6000]
+        test += out_test #[:1500]
     print(len(train), len(test))
 
-    train = np.array(train)
-    pickle_out = open((save_dir + "test.pickle"),"wb")
+    # train = np.array(train)
+    pickle_out = open((save_dir + "test_can.pickle"),"wb")
     pickle.dump(train, pickle_out)
     pickle_out.close()
-    pickle_out = open((save_dir + "test_t.pickle"),"wb")
+    pickle_out = open((save_dir + "test_can_t.pickle"),"wb")
     pickle.dump(test, pickle_out)
     pickle_out.close()
 else:
-    pickle_in = open(save_dir + "test.pickle","rb")
+    pickle_in = open(save_dir + "test_can.pickle","rb")
     train = pickle.load(pickle_in)
-    pickle_in = open(save_dir + "test_t.pickle","rb")
+    pickle_in = open(save_dir + "test_can_t.pickle","rb")
     test = pickle.load(pickle_in)
 l = len(train)
 lt = len(test)
@@ -119,38 +115,48 @@ yt.to(torch.int64)
 print(Xt.dtype, yt.dtype)
 print(y[10:], yt[:10])
 
+# check = [0, 0]
+# for i in range(l):
+#         check[c[i].numpy()] += 1
+# print(check)
+# check = [0, 0]
+# for i in range(lt):
+#         check[ct[i].numpy()] += 1
+# print(check)
+
 total = 0
 class_correct = 0
 category_correct = 0
 
 cat_check = [0, 0, 0, 0]
 cat_total = [0, 0, 0, 0]
-cat_full = [0, 0, 0, 0]
-class_check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+class_check = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 for i in tqdm(range(len(Xt))):
     input_tensor = Xt[i].view(-1, 3, 224, 224).to(device)
     correct_class = yt[i].cpu().numpy().tolist()
     predicted_category, predicted_class = flex.predict(input_tensor)
-    cat_full[predicted_category] += 1
-    if predicted_category == c[i]:
+    if predicted_category == ct[i]:
         category_correct += 1
         cat_check[predicted_category] += 1
+    cat_total[ct[i]] += 1
     if predicted_class == correct_class:
         class_correct += 1
         class_check[predicted_class-1] += 1
-    cat_total[c[i]] += 1
     total += 1
+    # if ct[i] == 2:
+    #     print(ct[i], predicted_category, correct_class, predicted_class)
+    #     input()
+# del class_check
 
+print(total, category_correct, class_correct)
 print("--> ", round(category_correct / total, 3), round(class_correct / total, 3))
-print(cat_check, cat_total, cat_full)
-print(class_check)
+print(cat_check, class_check)
 print("Category accuracy: ", [round(cat_check[i] / cat_total[i], 3) for i in range(len(cat_total))])
-print("Class accuracy: ", [round(class_check[i] / 2500, 3) for i in range(len(class_check))])
 
-# Test: --> 0.634, 0.573      (1m 41s, 8500)
+# Test: 8500, 4744, 4248  --> 0.558, 0.5      (1m 45s)
 #      Cat_Check: [1215, 1736, 686, 1107]     Class_Check: [416, 412, 366, 454, 429, 408, 415, 186, 105, 125, 33, 85, 45, 0, 0, 0, 0, 263, 251, 90, 165]
 #      Category accuracy:  [0.81, 0.868, 0.229, 0.553]
-# Train: --> 0.746, 0.712      (6m 56s, 34000)
-#      Cat_Check: [1215, 1736, 686, 1107]     Class_Check: [416, 412, 366, 454, 429, 408, 415, 186, 105, 125, 33, 85, 45, 0, 0, 0, 0, 263, 251, 90, 165]
-#      Category accuracy:  [0.951, 0.903, 0.905, 0.037]
+# Train: 34000, 20468, 20186  --> 0.602 0.594    (7m 11s)
+#      Cat_Check: [5843, 7874, 2292, 4459]     Class_Check: [1968, 1892, 1974, 1977, 1973, 1957, 1967, 596, 411, 440, 104, 394, 197, 0, 0, 0, 0, 1536, 1324, 654, 822]
+#      Category accuracy:  [0.974, 0.984, 0.191, 0.557]
